@@ -1,0 +1,11 @@
+AllCops:
+  Exclude:
+    - 'config/**/*'
+    - 'db/**/*'
+    - 'bin/**/*'
+  RunRailsCops: true
+Documentation:
+  Enabled: false
+Metrics/LineLength:
+  Max: 120
+  AllowURI: true
