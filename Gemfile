@@ -1,6 +1,5 @@
 source 'https://rubygems.org'
 
-
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.1'
 
@@ -56,5 +55,18 @@ group :development, :test do
 
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
+
+  # find style convention errors
+  gem 'rubocop', require: false
 end
+
+# read sensitive data from env variables
+gem 'figaro', '1.0'
+
+# serialize my models
+gem 'active_model_serializers', '0.9.2'
+
+# for rspec tests, easily generate my models
+gem 'factory_girl_rails', '~> 4.0'
+
 
