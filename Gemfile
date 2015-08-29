@@ -60,8 +60,13 @@ group :development, :test do
   gem 'rubocop', require: false
 end
 
+# read sensitive data from env variables
+gem 'figaro', '1.0'
+
 # serialize my models
 gem 'active_model_serializers', '0.9.2'
 
 # for rspec tests, easily generate my models
 gem 'factory_girl_rails', '~> 4.0'
+
+
