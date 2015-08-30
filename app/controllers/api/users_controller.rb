@@ -1,4 +1,4 @@
-class Api::UsersController < ApiController
+class Api::UsersController < ApiController # rubocop:disable Style/ClassAndModuleChildren
   before_action :authenticated?
 
   def index

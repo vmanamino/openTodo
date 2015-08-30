@@ -1,16 +1,15 @@
 require 'rails_helper'
 include AuthHelper
 
-
 RSpec.describe Api::UsersController, type: :controller do
   let(:user) { create(:user) } # required for http_login below
 
   # method to check presence of attribute
-  def check_each_user(collection, name='users', elements, attribute, boolean)
+  def check_each_user(collection, name = 'users', elements, attribute, boolean)
     counter = 0
     while counter < elements
       expect(collection[name][counter].key?(attribute)).to be boolean
-      counter = counter + 1
+      counter += 1
     end
   end
 
@@ -39,7 +38,7 @@ RSpec.describe Api::UsersController, type: :controller do
       json = JSON.parse(response.body)
       check_each_user(json, 'users', 6, 'password', false)
     end
-    it "serialized json includes specified attributes in UserSerializer" do
+    it 'serialized json includes specified attributes in UserSerializer' do
       http_login
       get :index, users: user
       json = JSON.parse(response.body)
