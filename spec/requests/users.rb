@@ -28,7 +28,7 @@ RSpec.describe Api::UsersController, type: :request do
       json = JSON.parse(response.body)
       expect(json['users'].length).to eq(5)
     end
-    it 'serialized users exclude private attribute' do
+    it 'serialized users exclude password' do
       get '/api/users'
       json = JSON.parse(response.body)
       check_each_user(json, 5, 'password', false)
