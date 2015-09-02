@@ -19,6 +19,10 @@ RSpec.describe Api::UsersController, type: :request do
       get '/api/users'
       expect(response.status).to eq(200)
     end
+    it 'response is success' do
+      get '/api/users'
+      expect(response).to have_http_status(:success)
+    end
     it 'responds with serialized users' do
       get '/api/users'
       json = JSON.parse(response.body)
