@@ -2,7 +2,7 @@ class Api::UsersController < ApiController # rubocop:disable Style/ClassAndModul
   before_action :authenticated?
 
   def index
-    users = User.all
-    render json: users, each_serializer: UserSerializer
+    @users = User.all
+    render json: @users, each_serializer: UserSerializer
   end
 end
