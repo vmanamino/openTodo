@@ -18,5 +18,4 @@ describe ItemSerializer, type: :serializer do
       expect(@item_obj['item']['name']).to eq(item.name)
     end
   end
-
 end

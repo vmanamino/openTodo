@@ -13,5 +13,8 @@ describe UserSerializer, type: :serializer do
     it 'username equals User username' do
       expect(@user_obj['user']['username']).to eq(user.username)
     end
+    it 'private attributes excluded' do
+      expect(@user_obj['user']['password']).to be nil
+    end
   end
 end
