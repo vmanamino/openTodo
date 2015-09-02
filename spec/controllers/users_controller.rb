@@ -36,14 +36,14 @@ RSpec.describe Api::UsersController, type: :controller do
       http_login
       get :index
       json = JSON.parse(response.body)
-      check_each_user(json, 'users', 6, 'password', false)
+      check_each_user(json, 6, 'password', false)
     end
     it 'serialized json includes specified attributes in UserSerializer' do
       http_login
       get :index, users: user
       json = JSON.parse(response.body)
-      check_each_user(json, 'users', 6, 'id', true)
-      check_each_user(json, 'users', 6, 'username', true)
+      check_each_user(json, 6, 'id', true)
+      check_each_user(json, 6, 'username', true)
     end
     it 'no authenticated user responds with 401 status code' do
       get :index
