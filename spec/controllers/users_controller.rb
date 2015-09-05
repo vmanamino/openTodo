@@ -1,23 +1,15 @@
 require 'rails_helper'
 include AuthHelper
+include JsonHelper
 
 RSpec.describe Api::UsersController, type: :controller do
   let(:user) { create(:user) } # required for http_login below
-
-  # method to check presence of attribute
-  def check_each_user(collection, name = 'users', elements, attribute, boolean)
-    counter = 0
-    while counter < elements
-      expect(collection[name][counter].key?(attribute)).to be boolean
-      counter += 1
-    end
-  end
 
   describe '#index' do
     before do
       @users = create_list(:user, 5)
     end
-    it 'no authenticated user responds with http unauthorized' do
+    it 'unauthenticated user responds with http unauthorized' do
       get :index
       expect(response).to have_http_status(:unauthorized)
     end
@@ -40,7 +32,7 @@ RSpec.describe Api::UsersController, type: :controller do
     end
     it 'serialized json includes specified attributes in UserSerializer' do
       http_login
-      get :index, users: user
+      get :index
       json = JSON.parse(response.body)
       check_each_user(json, 6, 'id', true)
       check_each_user(json, 6, 'username', true)
@@ -53,6 +45,50 @@ RSpec.describe Api::UsersController, type: :controller do
       http_login
       get :index
       expect(response.status).to eq(200)
+    end
+  end
+  describe '#create' do
+    it 'unauthenticated user responds as http unauthorized' do
+      post :create, user: { username: user.username, password: user.password }
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'unauthenticated user responds with 401 status' do
+      post :create, user: { username: user.username, password: user.password }
+      expect(response.status).to eq(401)
+    end
+    it 'authenticated user responds as http success' do
+      http_login
+      post :create, user: { username: user.username, password: user.password }
+      expect(response).to have_http_status(:success)
+    end
+    it 'authenticated user responds with 200 status' do
+      http_login
+      post :create, user: { username: user.username, password: user.password }
+      expect(response.status).to eq(200)
+    end
+    it 'renders newly created user in JSON format' do
+      http_login
+      post :create, user: { username: user.username, password: user.password }
+      json = JSON.parse(response.body)
+      expect(json['user']['username']).to eq(user.username)
+    end
+    it 'serialized JSON excludes private attributes' do
+      http_login
+      post :create, user: { username: user.username, password: user.password }
+      json = JSON.parse(response.body)
+      check_user(json, 'password', false)
+    end
+    it 'serialized JSON includes attribute id' do
+      http_login
+      post :create, user: { username: user.username, password: user.password }
+      json = JSON.parse(response.body)
+      check_user(json, 'id', true)
+    end
+    it 'serialized JSON includes attribute username' do
+      http_login
+      post :create, user: { username: user.username, password: user.password }
+      json = JSON.parse(response.body)
+      check_user(json, 'username', true)
     end
   end
 end

@@ -1,0 +1,2 @@
+== 20150905022515 AddPermissionsToLists: migrating ============================
+-- add_column(:lists, :permissions, :string)
