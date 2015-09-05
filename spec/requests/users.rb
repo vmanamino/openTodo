@@ -26,17 +26,17 @@ RSpec.describe Api::UsersController, type: :request do
     it 'serialized users exclude password' do
       get '/api/users'
       json = JSON.parse(response.body)
-      check_each_user(json, 5, 'password', false)
+      check_each_object(json, 5, 'password', false)
     end
     it 'serialized users include id' do
       get '/api/users'
       json = JSON.parse(response.body)
-      check_each_user(json, 5, 'id', true)
+      check_each_object(json, 5, 'id', true)
     end
     it 'serialized users include username' do
       get '/api/users'
       json = JSON.parse(response.body)
-      check_each_user(json, 5, 'username', true)
+      check_each_object(json, 5, 'username', true)
     end
     it 'responds success to authentication with valid username and password' do
       controller.class.before_filter :authenticated?
@@ -73,17 +73,17 @@ RSpec.describe Api::UsersController, type: :request do
     it 'serialized user excludes private attribute' do
       post '/api/users', user: { username: @user.username, password: @user.password }
       json = JSON.parse(response.body)
-      check_user(json, 'password', false)
+      check_object(json, 'password', false)
     end
     it 'serialized user includes id' do
       post '/api/users', user: { username: @user.username, password: @user.password }
       json = JSON.parse(response.body)
-      check_user(json, 'id', true)
+      check_object(json, 'id', true)
     end
     it 'serialized user includes username' do
       post '/api/users', user: { username: @user.username, password: @user.password }
       json = JSON.parse(response.body)
-      check_user(json, 'username', true)
+      check_object(json, 'username', true)
     end
     it 'responds success to authentication with valid username and password' do
       controller.class.before_filter :authenticated?
@@ -93,6 +93,7 @@ RSpec.describe Api::UsersController, type: :request do
       expect(response).to have_http_status(:success)
     end
   end
+
   def authenticate_user(usr, pwd)
     ActionController::HttpAuthentication::Basic.encode_credentials(usr, pwd)
   end
