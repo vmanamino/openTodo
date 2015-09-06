@@ -21,21 +21,18 @@ RSpec.describe Api::UsersController, type: :controller do
     it 'returns users serialized in json' do
       http_login
       get :index
-      json = JSON.parse(response.body)
-      expect(json['users'].length).to eq(6)
+      expect(response_in_json['users'].length).to eq(6)
     end
     it 'serialized json excludes private attributes' do
       http_login
       get :index
-      json = JSON.parse(response.body)
-      check_each_object(json, 6, 'password', false)
+      check_each_object(response_in_json, 6, 'password', false)
     end
     it 'serialized json includes specified attributes in UserSerializer' do
       http_login
       get :index
-      json = JSON.parse(response.body)
-      check_each_object(json, 6, 'id', true)
-      check_each_object(json, 6, 'username', true)
+      check_each_object(response_in_json, 6, 'id', true)
+      check_each_object(response_in_json, 6, 'username', true)
     end
     it 'no authenticated user responds with 401 status code' do
       get :index
@@ -69,26 +66,37 @@ RSpec.describe Api::UsersController, type: :controller do
     it 'renders newly created user in JSON format' do
       http_login
       post :create, user: { username: user.username, password: user.password }
-      json = JSON.parse(response.body)
-      expect(json['user']['username']).to eq(user.username)
+      expect(response_in_json['user']['username']).to eq(user.username)
     end
     it 'serialized JSON excludes private attributes' do
       http_login
       post :create, user: { username: user.username, password: user.password }
-      json = JSON.parse(response.body)
-      check_object(json, 'password', false)
+      check_object(response_in_json, 'password', false)
     end
     it 'serialized JSON includes attribute id' do
       http_login
       post :create, user: { username: user.username, password: user.password }
-      json = JSON.parse(response.body)
-      check_object(json, 'id', true)
+      check_object(response_in_json, 'id', true)
     end
     it 'serialized JSON includes attribute username' do
       http_login
       post :create, user: { username: user.username, password: user.password }
-      json = JSON.parse(response.body)
-      check_object(json, 'username', true)
+      check_object(response_in_json, 'username', true)
+    end
+    it 'username matches value given' do
+      http_login
+      post :create, user: { username: user.username, password: user.password }
+      expect(response_in_json['user']['username']).to eq(user.username)
+    end
+    it 'failure responds with appropriate message for absent password' do
+      http_login
+      post :create, user: { username: user.username, password: ' ' }
+      expect(response_in_json['errors'][0]).to eq('Password can\'t be blank')
+    end
+    it 'failure responds with appropriate message for absent username' do
+      http_login
+      post :create, user: { username: ' ', password: user.password }
+      expect(response_in_json['errors'][0]).to eq('Username can\'t be blank')
     end
   end
 end
