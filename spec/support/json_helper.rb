@@ -8,7 +8,7 @@ module JsonHelper
     end
   end
   # method to check presense of attribute in single object
-  def check_object(object, name='user', attribute, boolean)
+  def check_object(object, name = 'user', attribute, boolean)
     expect(object[name].key?(attribute)).to be boolean
   end
 

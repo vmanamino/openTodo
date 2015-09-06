@@ -1,4 +1,4 @@
-class Api::ItemsController < ApiController
+class Api::ItemsController < ApiController # rubocop:disable Style/ClassAndModuleChildren
   before_action :authenticated?
 
   def create

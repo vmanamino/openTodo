@@ -9,7 +9,7 @@ RSpec.describe Api::ListsController, type: :request do
     before do
       controller.class.skip_before_filter :authenticated?
     end
-    it 'responds with serialized list' do
+    it 'responds with a list object serialized in JSON' do
       post "/api/users/#{user.id}/lists", list: { name: 'my list' }
       expect(response_in_json.length).to eq(1)
     end
@@ -40,17 +40,17 @@ RSpec.describe Api::ListsController, type: :request do
     it 'responds with sucess to authenticated user' do
       controller.class.before_filter :authenticated?
       credentials = user_credentials(user.username, user.password)
-      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, { 'HTTP_AUTHORIZATION' => credentials }
+      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => credentials
       expect(response).to have_http_status(:success)
     end
     it 'responds with unauthorized to unauthenticated user' do
       controller.class.before_filter :authenticated?
-      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, { 'HTTP_AUTHORIZATION' => nil }
+      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => nil
     end
-    it 'responds with serialized list to authenticated user' do
+    it 'responds with serialized list object to authenticated user' do
       controller.class.before_filter :authenticated?
       credentials = user_credentials(user.username, user.password)
-      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, { 'HTTP_AUTHORIZATION' => credentials }
+      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => credentials
       expect(response_in_json.length).to eq(1)
     end
     it 'failure responds with appropriate error message for absent name' do

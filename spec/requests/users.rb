@@ -39,12 +39,12 @@ RSpec.describe Api::UsersController, type: :request do
       controller.class.before_filter :authenticated?
       user = create(:user)
       credentials = user_credentials(user.username, user.password)
-      get '/api/users', nil, { 'HTTP_AUTHORIZATION' => credentials }
+      get '/api/users', nil, 'HTTP_AUTHORIZATION' => credentials
       expect(response).to have_http_status(:success)
     end
     it 'responds unauthorized to invalid authentication attempt' do
       controller.class.before_filter :authenticated?
-      get '/api/users', nil, { 'HTTP_AUTHORIZATION' => nil }
+      get '/api/users', nil, 'HTTP_AUTHORIZATION' => nil
       expect(response).to have_http_status(:unauthorized)
     end
   end
@@ -77,18 +77,18 @@ RSpec.describe Api::UsersController, type: :request do
       controller.class.before_filter :authenticated?
       user = create(:user)
       credentials = user_credentials(user.username, user.password)
-      post '/api/users', { user: { username: @user.username, password: @user.password } }, { 'HTTP_AUTHORIZATION' => credentials }
+      post '/api/users', { user: { username: @user.username, password: @user.password } }, 'HTTP_AUTHORIZATION' => credentials # rubocop:disable Metrics/LineLength
       expect(response).to have_http_status(:success)
     end
     it 'responds unauthorized to unauthenticated user' do
       controller.class.before_filter :authenticated?
-      post '/api/users', { user: { username: @user.username, password: @user.password } }, { 'HTTP_AUTHORIZATION' => nil }
+      post '/api/users', { user: { username: @user.username, password: @user.password } }, 'HTTP_AUTHORIZATION' => nil
       expect(response).to have_http_status(:unauthorized)
     end
     it 'responds with serialized user to authentication with valid username and password' do
       controller.class.before_filter :authenticated?
       credentials = user_credentials(user.username, user.password)
-      post '/api/users', { user: { username: @user.username, password: @user.password } }, { 'HTTP_AUTHORIZATION' => credentials }
+      post '/api/users', { user: { username: @user.username, password: @user.password } }, 'HTTP_AUTHORIZATION' => credentials # rubocop:disable Metrics/LineLength
       expect(response_in_json.length).to eq(1)
     end
     it 'failure responds with appropriate error message for absent password' do
