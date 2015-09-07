@@ -135,9 +135,13 @@ RSpec.describe Api::UsersController, type: :request do
       delete "/api/users/#{@user_destroy.id}", nil, 'HTTP_AUTHORIZATION' => nil
       expect(response.status).to eq(401)
     end
-    it 'exception status not_found' do
+    it 'http error status not_found' do
       delete '/api/users/100'
       expect(response).to have_http_status(:not_found)
+    end
+    it 'error code 404' do
+      delete '/api/users/100'
+      expect(response.status).to eq(404)
     end
   end
 end

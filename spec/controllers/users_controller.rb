@@ -120,10 +120,15 @@ RSpec.describe Api::UsersController, type: :controller do
       delete :destroy, id: user_destroy.id
       expect(response.status).to eq(401)
     end
-    it 'raises exception' do
+    it 'raises exception status not_found' do
       http_login
-      allow(controller).to receive(:destroy) { fail ActiveRecord::RecordNotFound }
-      expect { controller.destroy }.to raise_exception(ActiveRecord::RecordNotFound)
+      delete :destroy, id: 100
+      expect(response).to have_http_status(:not_found)
+    end
+    it 'raises not found code 404' do
+      http_login
+      delete :destroy, id: 100
+      expect(response.status).to eq(404)
     end
   end
 end
