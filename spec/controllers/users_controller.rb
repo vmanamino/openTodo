@@ -1,23 +1,15 @@
 require 'rails_helper'
 include AuthHelper
+include JsonHelper
 
 RSpec.describe Api::UsersController, type: :controller do
   let(:user) { create(:user) } # required for http_login below
-
-  # method to check presence of attribute
-  def check_each_user(collection, name = 'users', elements, attribute, boolean)
-    counter = 0
-    while counter < elements
-      expect(collection[name][counter].key?(attribute)).to be boolean
-      counter += 1
-    end
-  end
 
   describe '#index' do
     before do
       @users = create_list(:user, 5)
     end
-    it 'no authenticated user responds with http unauthorized' do
+    it 'unauthenticated user responds with http unauthorized' do
       get :index
       expect(response).to have_http_status(:unauthorized)
     end
@@ -29,21 +21,18 @@ RSpec.describe Api::UsersController, type: :controller do
     it 'returns users serialized in json' do
       http_login
       get :index
-      json = JSON.parse(response.body)
-      expect(json['users'].length).to eq(6)
+      expect(response_in_json['users'].length).to eq(6)
     end
     it 'serialized json excludes private attributes' do
       http_login
       get :index
-      json = JSON.parse(response.body)
-      check_each_user(json, 6, 'password', false)
+      check_each_object(response_in_json, 6, 'password', false)
     end
     it 'serialized json includes specified attributes in UserSerializer' do
       http_login
-      get :index, users: user
-      json = JSON.parse(response.body)
-      check_each_user(json, 6, 'id', true)
-      check_each_user(json, 6, 'username', true)
+      get :index
+      check_each_object(response_in_json, 6, 'id', true)
+      check_each_object(response_in_json, 6, 'username', true)
     end
     it 'no authenticated user responds with 401 status code' do
       get :index
@@ -53,6 +42,61 @@ RSpec.describe Api::UsersController, type: :controller do
       http_login
       get :index
       expect(response.status).to eq(200)
+    end
+  end
+  describe '#create' do
+    it 'unauthenticated user responds as http unauthorized' do
+      post :create, user: { username: user.username, password: user.password }
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'unauthenticated user responds with 401 status' do
+      post :create, user: { username: user.username, password: user.password }
+      expect(response.status).to eq(401)
+    end
+    it 'authenticated user responds as http success' do
+      http_login
+      post :create, user: { username: user.username, password: user.password }
+      expect(response).to have_http_status(:success)
+    end
+    it 'authenticated user responds with 200 status' do
+      http_login
+      post :create, user: { username: user.username, password: user.password }
+      expect(response.status).to eq(200)
+    end
+    it 'renders newly created user in JSON format' do
+      http_login
+      post :create, user: { username: user.username, password: user.password }
+      expect(response_in_json['user']['username']).to eq(user.username)
+    end
+    it 'serialized JSON excludes private attributes' do
+      http_login
+      post :create, user: { username: user.username, password: user.password }
+      check_object(response_in_json, 'password', false)
+    end
+    it 'serialized JSON includes attribute id' do
+      http_login
+      post :create, user: { username: user.username, password: user.password }
+      check_object(response_in_json, 'id', true)
+    end
+    it 'serialized JSON includes attribute username' do
+      http_login
+      post :create, user: { username: user.username, password: user.password }
+      check_object(response_in_json, 'username', true)
+    end
+    it 'username matches value given' do
+      http_login
+      post :create, user: { username: user.username, password: user.password }
+      expect(response_in_json['user']['username']).to eq(user.username)
+    end
+    it 'failure responds with appropriate message for absent password' do
+      http_login
+      post :create, user: { username: user.username, password: ' ' }
+      expect(response_in_json['errors'][0]).to eq('Password can\'t be blank')
+    end
+    it 'failure responds with appropriate message for absent username' do
+      http_login
+      post :create, user: { username: ' ', password: user.password }
+      expect(response_in_json['errors'][0]).to eq('Username can\'t be blank')
     end
   end
 end
