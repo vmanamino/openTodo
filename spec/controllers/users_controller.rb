@@ -99,4 +99,31 @@ RSpec.describe Api::UsersController, type: :controller do
       expect(response_in_json['errors'][0]).to eq('Username can\'t be blank')
     end
   end
+  describe '#destroy' do
+    let(:user_destroy) { create(:user) }
+    let(:controller) { Api::UsersController.new }
+    it 'responds with status no_content' do
+      http_login
+      delete :destroy, id: user_destroy.id
+      expect(response).to have_http_status(:no_content)
+    end
+    it 'responds with status code 204' do
+      http_login
+      delete :destroy, id: user_destroy.id
+      expect(response.status).to eq(204)
+    end
+    it 'responsds with anauthorized to unauthenticated user' do
+      delete :destroy, id: user_destroy.id
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'responds with 401 code to unauthenticated user' do
+      delete :destroy, id: user_destroy.id
+      expect(response.status).to eq(401)
+    end
+    it 'raises exception' do
+      http_login
+      allow(controller).to receive(:destroy) { fail ActiveRecord::RecordNotFound }
+      expect { controller.destroy }.to raise_exception(ActiveRecord::RecordNotFound)
+    end
+  end
 end
