@@ -102,6 +102,9 @@ RSpec.describe Api::UsersController, type: :controller do
   describe '#destroy' do
     let(:user_destroy) { create(:user) }
     let(:controller) { Api::UsersController.new }
+    before do
+      @lists = create_list(:list, 5, user_id: user_destroy.id)
+    end
     it 'responds with status no_content' do
       http_login
       delete :destroy, id: user_destroy.id
@@ -112,7 +115,7 @@ RSpec.describe Api::UsersController, type: :controller do
       delete :destroy, id: user_destroy.id
       expect(response.status).to eq(204)
     end
-    it 'responsds with anauthorized to unauthenticated user' do
+    it 'responds with unauthorized to unauthenticated user' do
       delete :destroy, id: user_destroy.id
       expect(response).to have_http_status(:unauthorized)
     end
@@ -129,6 +132,14 @@ RSpec.describe Api::UsersController, type: :controller do
       http_login
       delete :destroy, id: 100
       expect(response.status).to eq(404)
+    end
+    it 'destroys list dependents' do
+      all_lists = List.all
+      expect(all_lists.length).to eq(5)
+      http_login
+      delete :destroy, id: user_destroy.id
+      all_lists.reload
+      expect(all_lists.length).to eq(0)
     end
   end
 end
