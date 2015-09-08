@@ -65,4 +65,46 @@ RSpec.describe Api::ListsController, type: :controller do
       expect(response_in_json['errors'][0]).to eq('Name can\'t be blank')
     end
   end
+  describe '#destroy request' do
+    before do
+      @list_destroy = create(:list, user_id: user.id)
+      @items = create_list(:item, 5, list_id: @list_destroy.id)
+    end
+    it 'responds with status no_content' do
+      http_login
+      delete :destroy, user_id: user.id, id: @list_destroy.id
+      expect(response).to have_http_status(:no_content)
+    end
+    it 'responds with status code 204' do
+      http_login
+      delete :destroy, user_id: user.id, id: @list_destroy.id
+      expect(response.status).to eq(204)
+    end
+    it 'responds with unauthorized to unauthenticated user' do
+      delete :destroy, user_id: user.id, id: @list_destroy.id
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'responds with status code 401 to unauthenticated user' do
+      delete :destroy, user_id: user.id, id: @list_destroy.id
+      expect(response.status).to eq(401)
+    end
+    it 'raises exception status not found' do
+      http_login
+      delete :destroy, user_id: user.id, id: 100
+      expect(response).to have_http_status(:not_found)
+    end
+    it 'raises not found code 404' do
+      http_login
+      delete :destroy, user_id: user.id, id: 100
+      expect(response.status).to eq(404)
+    end
+    it 'destroys item dependents' do
+      items = Item.all
+      expect(items.length).to eq(5)
+      http_login
+      delete :destroy, user_id: user.id, id: @list_destroy.id
+      items.reload
+      expect(items.length).to eq(0)
+    end
+  end
 end

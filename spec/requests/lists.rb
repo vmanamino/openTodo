@@ -58,4 +58,56 @@ RSpec.describe Api::ListsController, type: :request do
       expect(response_in_json['errors'][0]).to eq('Name can\'t be blank')
     end
   end
+  describe '#destroy request' do
+    before do
+      @list_destroy = create(:list, user_id: user.id)
+      @items = create_list(:item, 5, list_id: @list_destroy.id)
+      controller.class.skip_before_filter :authenticated?
+    end
+    it 'responds with no_content' do
+      delete "/api/users/#{user.id}/lists/#{@list_destroy.id}"
+      expect(response).to have_http_status(:no_content)
+    end
+    it 'responds with code 204' do
+      delete "/api/users/#{user.id}/lists/#{@list_destroy.id}"
+      expect(response.status).to eq(204)
+    end
+    it 'responds with no_content to authenticated user' do
+      controller.class.before_filter :authenticated?
+      credentials = user_credentials(user.username, user.password)
+      delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => credentials
+      expect(response).to have_http_status(:no_content)
+    end
+    it 'responds with code 204 to authenticated user' do
+      controller.class.before_filter :authenticated?
+      credentials = user_credentials(user.username, user.password)
+      delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => credentials
+      expect(response.status).to eq(204)
+    end
+    it 'responds with unauthorized to unauthenticated user' do
+      controller.class.before_filter :authenticated?
+      delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => nil
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'responds with status code 401 to unauthenticated user' do
+      controller.class.before_filter :authenticated?
+      delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => nil
+      expect(response.status).to eq(401)
+    end
+    it 'raises exception status not_found' do
+      delete "/api/users/#{user.id}/lists/100"
+      expect(response).to have_http_status(:not_found)
+    end
+    it 'raises code 404 for exception' do
+      delete "/api/users/#{user.id}/lists/100"
+      expect(response.status).to eq(404)
+    end
+    it 'destroys item dependents' do
+      items = Item.all
+      expect(items.length).to eq(5)
+      delete "/api/users/#{user.id}/lists/#{@list_destroy.id}"
+      items.reload
+      expect(items.length).to eq(0)
+    end
+  end
 end

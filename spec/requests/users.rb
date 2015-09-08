@@ -100,4 +100,48 @@ RSpec.describe Api::UsersController, type: :request do
       expect(response_in_json['errors'][0]).to eq('Username can\'t be blank')
     end
   end
+  describe '#destroy' do
+    before do
+      @user_destroy = create(:user)
+      controller.class.skip_before_filter :authenticated?
+    end
+    it 'responds with no_content' do
+      delete "/api/users/#{@user_destroy.id}"
+      expect(response).to have_http_status(:no_content)
+    end
+    it 'responds with code 204' do
+      delete "/api/users/#{@user_destroy.id}"
+      expect(response.status).to eq(204)
+    end
+    it 'responds with no_content to authenticated user' do
+      controller.class.before_filter :authenticated?
+      credentials = user_credentials(user.username, user.password)
+      delete "/api/users/#{@user_destroy.id}", nil, 'HTTP_AUTHORIZATION' => credentials
+      expect(response).to have_http_status(:no_content)
+    end
+    it 'responds with code 204 to authenticated user' do
+      controller.class.before_filter :authenticated?
+      credentials = user_credentials(user.username, user.password)
+      delete "/api/users/#{@user_destroy.id}", nil, 'HTTP_AUTHORIZATION' => credentials
+      expect(response.status).to eq(204)
+    end
+    it 'responds with unauthorized to unauthenticated user' do
+      controller.class.before_filter :authenticated?
+      delete "/api/users/#{@user_destroy.id}", nil, 'HTTP_AUTHORIZATION' => nil
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'responds with code 401 to unauthenticated user' do
+      controller.class.before_filter :authenticated?
+      delete "/api/users/#{@user_destroy.id}", nil, 'HTTP_AUTHORIZATION' => nil
+      expect(response.status).to eq(401)
+    end
+    it 'http error status not_found' do
+      delete '/api/users/100'
+      expect(response).to have_http_status(:not_found)
+    end
+    it 'error code 404' do
+      delete '/api/users/100'
+      expect(response.status).to eq(404)
+    end
+  end
 end
