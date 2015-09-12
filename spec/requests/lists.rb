@@ -29,9 +29,9 @@ RSpec.describe Api::ListsController, type: :request do
       post "/api/users/#{user.id}/lists", list: { name: 'my list' }
       expect(response_in_json['list']['user_id']).to eq(user.id)
     end
-    it 'permissions automatically set to public' do
+    it 'permissions automatically set to viewable' do
       post "/api/users/#{user.id}/lists", list: {  name: 'my list' }
-      expect(response_in_json['list']['permissions']).to eq('public')
+      expect(response_in_json['list']['permissions']).to eq('viewable')
     end
     it 'enter private permissions' do
       post "/api/users/#{user.id}/lists", list: { name: 'my list', permissions: 'private' }

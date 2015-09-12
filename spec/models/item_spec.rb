@@ -6,4 +6,5 @@ describe Item do
   end
   it { should belong_to(:list) }
   it { should validate_presence_of(:name) }
+  it { should_not allow_value(nil).for(:done) }
 end

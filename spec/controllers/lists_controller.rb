@@ -6,12 +6,12 @@ RSpec.describe Api::ListsController, type: :controller do
   let(:user) { create(:user) }
   describe '#create' do
     it 'denied to unauthenticated user' do
-      post :create, user_id: user.id, list: { name: 'my list', permissions: 'public' }
+      post :create, user_id: user.id, list: { name: 'my list', permissions: 'viewable' }
       expect(response).to have_http_status(:unauthorized)
     end
     it 'permitted to authenticated user' do
       http_login
-      post :create, user_id: user.id, list: { name: 'my list', permissions: 'public' }
+      post :create, user_id: user.id, list: { name: 'my list', permissions: 'viewable' }
       expect(response).to have_http_status(:success)
     end
     it 'new list in JSON' do
@@ -19,10 +19,10 @@ RSpec.describe Api::ListsController, type: :controller do
       post :create, user_id: user.id, list: { name: 'my list' }
       expect(response_in_json.length).to eq(1)
     end
-    it 'new list has default permissions \'public\'' do
+    it 'new list has default permissions \'viewable\'' do
       http_login
       post :create, user_id: user.id, list: { name: 'my list' }
-      expect(response_in_json['list']['permissions']).to eq('public')
+      expect(response_in_json['list']['permissions']).to eq('viewable')
     end
     it 'includes id' do
       http_login
@@ -49,10 +49,10 @@ RSpec.describe Api::ListsController, type: :controller do
       post :create, user_id: user.id, list: { name: 'my list' }
       expect(response_in_json['list']['user_id']).to eq(user.id)
     end
-    it 'permissions automatically set to public' do
+    it 'permissions automatically set to \'viewable\'' do
       http_login
       post :create, user_id: user.id, list: { name: 'my list' }
-      expect(response_in_json['list']['permissions']).to eq('public')
+      expect(response_in_json['list']['permissions']).to eq('viewable')
     end
     it 'enter private permissions' do
       http_login
@@ -73,6 +73,10 @@ RSpec.describe Api::ListsController, type: :controller do
       http_login
       patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'private' }
       expect(response.status).to eq(200)
+    end
+    it 'denies unauthenticated user' do
+      patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'private' }
+      expect(response.status).to eq(401)
     end
     it 'saves attributes' do
       http_login

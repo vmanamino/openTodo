@@ -26,6 +26,10 @@ RSpec.describe Api::ItemsController, type: :request do
       post "/api/lists/#{list.id}/items", item: { name: 'get done' }
       check_object(response_in_json, 'item', 'list_id', true)
     end
+    it 'serialized object includes done' do
+      post "/api/lists/#{list.id}/items", item: { name: 'get done on time' }
+      check_object(response_in_json, 'item', 'done', true)
+    end
     it 'name matches name entered' do
       post "/api/lists/#{list.id}/items", item: { name: 'get done on time' }
       expect(response_in_json['item']['name']).to eq('get done on time')
@@ -33,6 +37,10 @@ RSpec.describe Api::ItemsController, type: :request do
     it 'list_id belongs to list in params' do
       post "/api/lists/#{list.id}/items", item: { name: 'get done' }
       expect(response_in_json['item']['list_id']).to eq(list.id)
+    end
+    it 'done is set to false by default' do
+      post "/api/lists/#{list.id}/items", item: { name: 'get it done' }
+      expect(response_in_json['item']['done']).to eq(false)
     end
     it 'one item is created with id value' do
       post "/api/lists/#{list.id}/items", item: { name: 'get done' }
@@ -62,6 +70,40 @@ RSpec.describe Api::ItemsController, type: :request do
       credentials = user_credentials(user.username, user.password)
       post "/api/lists/#{list.id}/items", { item: { name: ' ' } }, 'HTTP_AUTHORIZATION' => credentials
       expect(response_in_json['errors'][0]).to eq('Name can\'t be blank')
+    end
+  end
+  describe '#update request' do
+    before do
+      @item_update = create(:item, list_id: list.id)
+      controller.class.skip_before_filter :authenticated?
+    end
+    it 'responds with success' do
+      patch "/api/lists/#{list.id}/items/#{@item_update.id}", item: { name: 'my finished item', done: true }
+      expect(response).to have_http_status(:success)
+    end
+    it 'saves attributes' do
+      patch "/api/lists/#{list.id}/items/#{@item_update.id}", item: { name: 'my finished item', done: true }
+      expect(response_in_json['item']['name']).to eq('my finished item')
+      expect(response_in_json['item']['done']).to eq(true)
+    end
+    it 'raises exception status' do
+      patch "/api/lists/#{list.id}/items/#{@item_update.id}", item: { name: 'my finished item', done: nil }
+      expect(response.status).to eq(422)
+    end
+    it 'produces appropriate error message' do
+      patch "/api/lists/#{list.id}/items/#{@item_update.id}", item: { name: 'my finished item', done: nil }
+      expect(response_in_json['errors'][0]).to eq('Done is not included in the list')
+    end
+    it 'responds with success to authenticated user' do
+      controller.class.before_filter :authenticated?
+      credentials = user_credentials(user.username, user.password)
+      patch "/api/lists/#{list.id}/items/#{@item_update.id}", { item: { name: 'my finished item', done: true } }, 'HTTP_AUTHORIZATION' => credentials
+      expect(response).to have_http_status(:success)
+    end
+    it 'responds with unauthorized to unauthenticated user' do
+      controller.class.before_filter :authenticated?
+      patch "/api/lists/#{list.id}/items/#{@item_update.id}", { item: { name: 'my finished item', done: true } }, 'HTTP_AUTHORIZATION' =>  nil
+      expect(response).to have_http_status(:unauthorized)
     end
   end
 end
