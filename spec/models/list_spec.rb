@@ -7,7 +7,8 @@ describe List do
   it { should have_many(:items).dependent(:destroy) }
   it { should belong_to(:user) }
   it { should validate_presence_of(:name) }
-  it { should validate_presence_of(:permissions) }
+  # before { allow(subject).to receive(:permissions_valid?).and_return(true) }
+  it { should validate_inclusion_of(:permissions).in_array(%w( public private )) }
   describe '.defaults' do
     it 'sets permissions to public when list is created' do
       new_list = create(:list)

@@ -58,6 +58,41 @@ RSpec.describe Api::ListsController, type: :request do
       expect(response_in_json['errors'][0]).to eq('Name can\'t be blank')
     end
   end
+  describe '#update request' do
+    before do
+      @list_update = create(:list, user_id: user.id)
+      controller.class.skip_before_filter :authenticated?
+    end
+    it 'responds with status 200' do
+      patch "/api/users/#{user.id}/lists/#{@list_update.id}", list: { name: 'my new list', permissions: 'private' }
+      expect(response).to have_http_status(200)
+    end
+    it 'saves attributes' do
+      patch "/api/users/#{user.id}/lists/#{@list_update.id}", list: { name: "my new list", permissions: 'private' }
+      updated_list = List.find(@list_update.id)
+      expect(updated_list.name).to eq('my new list')
+      expect(updated_list.permissions).to eq('private')
+    end
+    it 'raises exception status' do
+      patch "/api/users/#{user.id}/lists/#{@list_update.id}", list: { name: 'my new list', permissions: 'update not granted' }
+      expect(response).to have_http_status(422)
+    end
+    it 'appropriate error message' do
+      patch "/api/users/#{user.id}/lists/#{@list_update.id}", list: { name: 'my new list', permissions: 'update not granted' }
+      expect(response_in_json['errors'][0]).to eq('Permissions is not included in the list')
+    end
+    it 'responds with success to authenticated user' do
+      controller.class.before_filter :authenticated?
+      credentials = user_credentials(user.username, user.password)
+      patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => credentials
+      expect(response).to have_http_status(:success)
+    end
+    it 'responds with unauthorized to unauthenticated user' do
+      controller.class.before_filter :authenticated?
+      patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private'} }, 'HTTP_AUTHORIZATION' => nil
+      expect(response).to have_http_status(:unauthorized)
+    end
+  end
   describe '#destroy request' do
     before do
       @list_destroy = create(:list, user_id: user.id)

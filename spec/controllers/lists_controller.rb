@@ -65,7 +65,39 @@ RSpec.describe Api::ListsController, type: :controller do
       expect(response_in_json['errors'][0]).to eq('Name can\'t be blank')
     end
   end
-  describe '#destroy request' do
+  describe '#update' do
+    before do
+      @list_update = create(:list, user_id: user.id)
+    end
+    it 'it responds with status 200' do
+      http_login
+      patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'private' }
+      expect(response.status).to eq(200)
+    end
+    it 'saves attributes' do
+      http_login
+      patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'private' }
+      updated_list = List.find(@list_update.id)
+      expect(updated_list.name).to eq('new and improved')
+      expect(updated_list.permissions).to eq('private')
+    end
+    it 'raises exception status' do
+      http_login
+      patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'cannot be updated' }
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+    it 'responds with 422 code' do
+      http_login
+      patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'cannot be updated' }
+      expect(response.status).to eq(422)
+    end
+    it 'appropriate error message' do
+      http_login
+      patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'cannot be updated' }
+      expect(response_in_json['errors'][0]).to eq('Permissions is not included in the list')
+    end
+  end
+  describe '#destroy' do
     before do
       @list_destroy = create(:list, user_id: user.id)
       @items = create_list(:item, 5, list_id: @list_destroy.id)
