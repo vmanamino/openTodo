@@ -87,17 +87,17 @@ RSpec.describe Api::ListsController, type: :controller do
     end
     it 'raises exception status' do
       http_login
-      patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'cannot be updated' }
+      patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'cannot be updated' } # rubocop:disable Metrics/LineLength
       expect(response).to have_http_status(:unprocessable_entity)
     end
     it 'responds with 422 code' do
       http_login
-      patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'cannot be updated' }
+      patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'cannot be updated' } # rubocop:disable Metrics/LineLength
       expect(response.status).to eq(422)
     end
     it 'appropriate error message' do
       http_login
-      patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'cannot be updated' }
+      patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'cannot be updated' } # rubocop:disable Metrics/LineLength
       expect(response_in_json['errors'][0]).to eq('Permissions is not included in the list')
     end
   end

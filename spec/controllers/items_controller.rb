@@ -71,7 +71,7 @@ RSpec.describe Api::ItemsController, type: :controller do
       expect(response.status).to eq(200)
     end
     it 'denies unauthenticated user' do
-      patch :update, list_id: list.id, id: @item_update.id, item: { name: 'my finished item', done: true}
+      patch :update, list_id: list.id, id: @item_update.id, item: { name: 'my finished item', done: true }
       expect(response.status).to eq(401)
     end
     it 'saves attributes' do

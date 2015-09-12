@@ -14,5 +14,8 @@ describe ListSerializer, type: :serializer do
     it 'user_id equals User id' do
       expect(@list_obj['list']['user_id']).to eq(list.user_id)
     end
+    it 'permissions set by default to viewable' do
+      expect(@list_obj['list']['permissions']).to eq('viewable')
+    end
   end
 end

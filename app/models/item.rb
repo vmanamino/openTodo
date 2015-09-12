@@ -11,5 +11,4 @@ class Item < ActiveRecord::Base
   def defaults
     self.done ||= false
   end
-
 end

@@ -97,12 +97,12 @@ RSpec.describe Api::ItemsController, type: :request do
     it 'responds with success to authenticated user' do
       controller.class.before_filter :authenticated?
       credentials = user_credentials(user.username, user.password)
-      patch "/api/lists/#{list.id}/items/#{@item_update.id}", { item: { name: 'my finished item', done: true } }, 'HTTP_AUTHORIZATION' => credentials
+      patch "/api/lists/#{list.id}/items/#{@item_update.id}", { item: { name: 'my finished item', done: true } }, 'HTTP_AUTHORIZATION' => credentials # rubocop:disable Metrics/LineLength
       expect(response).to have_http_status(:success)
     end
     it 'responds with unauthorized to unauthenticated user' do
       controller.class.before_filter :authenticated?
-      patch "/api/lists/#{list.id}/items/#{@item_update.id}", { item: { name: 'my finished item', done: true } }, 'HTTP_AUTHORIZATION' =>  nil
+      patch "/api/lists/#{list.id}/items/#{@item_update.id}", { item: { name: 'my finished item', done: true } }, 'HTTP_AUTHORIZATION' =>  nil # rubocop:disable Metrics/LineLength
       expect(response).to have_http_status(:unauthorized)
     end
   end
