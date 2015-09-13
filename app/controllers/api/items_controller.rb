@@ -12,7 +12,16 @@ class Api::ItemsController < ApiController # rubocop:disable Style/ClassAndModul
     end
   end
 
+  def update
+    item = Item.find(params[:id])
+    if item.update_attributes(item_params)
+      render json: item
+    else
+      render json: { errors: item.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
   def item_params
-    params.require(:item).permit(:name, :list_id)
+    params.require(:item).permit(:name, :done)
   end
 end

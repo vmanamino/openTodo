@@ -17,5 +17,8 @@ describe ItemSerializer, type: :serializer do
     it 'name equals Item name' do
       expect(@item_obj['item']['name']).to eq(item.name)
     end
+    it 'done is set to false by default' do
+      expect(@item_obj['item']['done']).to be false
+    end
   end
 end

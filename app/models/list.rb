@@ -3,7 +3,8 @@ class List < ActiveRecord::Base
   has_many :items, dependent: :destroy
 
   validates :name, presence: true
-  validates :permissions, presence: true
+  # validates_inclusion_of :permissions, in: %w( viewable private open ), allow_nil: false
+  validates :permissions, inclusion: %w( viewable private open ), allow_nil: false
 
   after_initialize :defaults, if: :new_record?
 
@@ -11,6 +12,6 @@ class List < ActiveRecord::Base
 
   def defaults
     # self.name ||= 'my list'
-    self.permissions ||= 'public'
+    self.permissions ||= 'viewable'
   end
 end
