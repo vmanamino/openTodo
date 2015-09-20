@@ -1,5 +1,5 @@
 class ApiController < ApplicationController
-  skip_before_action :verify_authenticity_token
+  # skip_before_action :verify_authenticity_token
 
   def _render_with_renderer_json(json, options)
     serializer = build_json_serializer(json, options)
