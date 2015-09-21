@@ -8,7 +8,7 @@ class ApiKey < ActiveRecord::Base
 
   def expires_at_is_time
     if !expires_at.is_a?(Time)
-      errors.add(:expires_at, 'Must be a valid time')
+      errors.add(:expires_at, 'Must be a valid time value')
     end
   end
 
