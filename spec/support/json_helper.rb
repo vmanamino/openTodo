@@ -1,8 +1,8 @@
 module JsonHelper
   # method to check presence of attribute in objects
-  def check_each_object(collection, name = 'users', elements, attribute, boolean)
+  def check_each_object(collection, name = 'users', attribute, boolean)
     counter = 0
-    while counter < elements
+    while counter < collection.length
       expect(collection[name][counter].key?(attribute)).to be boolean
       counter += 1
     end
