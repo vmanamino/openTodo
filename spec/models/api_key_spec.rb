@@ -15,9 +15,8 @@ describe ApiKey do
         duplicate_list.push(key)
       else # each subsequent key will be checked against all of the duplicate list keys for a match
         duplicate_list.each do |duplicate_list_key|
-          if key.access_token == duplicate_list_key.access_token # if match, then duplicate is incremented
-            duplicate =+ 1
-          end
+          # if match, then duplicate is incremented
+          duplicate += 1 if key.access_token == duplicate_list_key.access_token
         end
         duplicate_list.push(key) # push subsequent keys into duplicate list
       end

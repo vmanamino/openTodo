@@ -1,0 +1,42 @@
+{
+  "RSpec": {
+    "coverage": {
+      "/home/action/code/openTodo/app/models/api_key.rb": [
+        1,
+        1,
+        null,
+        1,
+        null,
+        1,
+        1,
+        null,
+        1,
+        11,
+        null,
+        null,
+        1,
+        null,
+        1,
+        11,
+        null,
+        11,
+        11,
+        11,
+        null,
+        null,
+        1,
+        12,
+        null,
+        null
+      ],
+      "/home/action/code/openTodo/app/models/user.rb": [
+        1,
+        1,
+        1,
+        1,
+        null
+      ]
+    },
+    "timestamp": 1442892682
+  }
+}

@@ -7,17 +7,17 @@ class ApiKey < ActiveRecord::Base
   after_initialize :defaults, if: :new_record?
 
   def expires_at_is_time
-    if !expires_at.is_a?(Time)
-      errors.add(:expires_at, 'Must be a valid time value')
-    end
+    errors.add(:expires_at, 'Must be a valid time value') unless expires_at.is_a?(Time)
   end
 
   private
 
   def generate_access_token
+    number = 0
     begin
       self.access_token = SecureRandom.hex
-    end while self.class.exists?(access_token: access_token)
+      number += 1
+    end while self.class.exists?(access_token: access_token) && number == 1 # rubocop:disable Lint/Loop
   end
 
   def defaults

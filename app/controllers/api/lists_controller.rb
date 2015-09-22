@@ -1,5 +1,5 @@
 class Api::ListsController < ApiController # rubocop:disable Style/ClassAndModuleChildren
-  before_action :authenticated?, :unless => :keyed_open
+  before_action :authenticated?, unless: :keyed_open
 
   def create
     user = User.find(params[:user_id])

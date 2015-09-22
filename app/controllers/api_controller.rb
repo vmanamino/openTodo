@@ -1,5 +1,5 @@
 class ApiController < ApplicationController
-  skip_before_action :verify_authenticity_token, :if => :keyed_open
+  skip_before_action :verify_authenticity_token, if: :keyed_open
 
   def _render_with_renderer_json(json, options)
     serializer = build_json_serializer(json, options)
@@ -18,8 +18,10 @@ class ApiController < ApplicationController
   end
 
   def keyed_open
+    time_now = Time.now # rubocop:disable Rails/TimeZone
     authenticate_or_request_with_http_token do |token, options|
-      ApiKey.exists?(access_token: token)
+      key = ApiKey.find_by(access_token: token)
+      (!key.nil?) && ((key.expires_at - time_now) > 0)
     end
   end
 end
