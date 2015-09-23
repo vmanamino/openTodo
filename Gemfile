@@ -68,3 +68,6 @@ gem 'active_model_serializers', '0.9.2'
 
 # for rspec tests, easily generate my models
 gem 'factory_girl_rails', '~> 4.0'
+
+# test code coverage
+gem 'simplecov', require: false, group: :test
