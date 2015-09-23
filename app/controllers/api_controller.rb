@@ -19,7 +19,7 @@ class ApiController < ApplicationController
 
   def keyed_open
     time_now = Time.now # rubocop:disable Rails/TimeZone
-    authenticate_or_request_with_http_token do |token, options|
+    authenticate_or_request_with_http_token do |token, _options|
       key = ApiKey.find_by(access_token: token)
       (!key.nil?) && ((key.expires_at - time_now) > 0)
     end
