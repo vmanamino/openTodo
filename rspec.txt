@@ -1,0 +1,7 @@
+required simplecov
+..........
+
+Finished in 0.25199 seconds (files took 2.2 seconds to load)
+10 examples, 0 failures
+
+Coverage report generated for RSpec to /home/action/code/openTodo/coverage. 100 / 117 LOC (85.47%) covered.

@@ -17,6 +17,14 @@ class ApiController < ApplicationController
     authenticate_or_request_with_http_basic { |username, password| User.where(username: username, password: password).present? } # rubocop:disable Metrics/LineLength
   end
 
+  def get_user # rubocop:disable Style/AccessorMethodName
+    user = ''
+    authenticate_or_request_with_http_basic do |username, password|
+      user = User.where(username: username, password: password).first
+    end
+    user
+  end
+
   def keyed_open
     time_now = Time.now # rubocop:disable Rails/TimeZone
     authenticate_or_request_with_http_token do |token, _options|
