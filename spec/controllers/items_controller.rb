@@ -14,6 +14,7 @@ RSpec.describe Api::ItemsController, type: :controller do
     it 'denied to expired key' do
       api_key.expires_at = 1.day.ago
       api_key.save
+      http_key_auth
       post :create, list_id: list.id, item: { name: 'get it done' }
       expect(response).to have_http_status(:unauthorized)
     end

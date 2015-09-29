@@ -48,6 +48,10 @@ RSpec.describe Api::ApiKeysController, type: :request do
       post "/api/lists/#{list.id}/items", { item: { name: 'my item', done: false } }, 'HTTP_AUTHORIZATION' => key
       expect(response_in_json['item']).not_to be nil
     end
+    it 'responds unauthorized to unauthenticated user' do
+      post '/api/api_keys', nil, 'HTTP_AUTHORIZATION' => nil
+      expect(response).to have_http_status(:unauthorized)
+    end
   end
   describe '#update request' do
     it 'expired/invalid key unauthorized to create list' do
