@@ -9,41 +9,41 @@ RSpec.describe Api::ListsController, type: :request do
   let(:key) { user_key(api_key.access_token) }
   describe '#index request' do
     before do
-      @lists = create_list(:list, 5, user: user)
+      @lists = create_list(:list, 5)
     end
     it 'responds with success to key authenticated user' do
-      get "/api/users/#{user.id}/lists", nil, 'HTTP_AUTHORIZATION' => key
+      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
       expect(response).to have_http_status(:success)
     end
     it 'responds with unauthorized to unauthenticated user' do
-      get "/api/users/#{user.id}/lists", nil, 'HTTP_AUTHORIZATION' => nil
+      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => nil
       expect(response).to have_http_status(:unauthorized)
     end
     it 'responds with unauthorized to expired key' do
       api_key.expires_at = 1.day.ago
       api_key.save
       key = user_key(api_key.access_token)
-      get "/api/users/#{user.id}/lists", nil, 'HTTP_AUTHORIZATION' => key
+      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
       expect(response).to have_http_status(:unauthorized)
     end
     it 'serializes all lists in json' do
-      get "/api/users/#{user.id}/lists", nil, 'HTTP_AUTHORIZATION' => key
+      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
       expect(response_in_json['lists'].length).to eq(5)
     end
     it 'all lists include id' do
-      get "/api/users/#{user.id}/lists", nil, 'HTTP_AUTHORIZATION' => key
+      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
       check_each_object(response_in_json, 'lists', 'id', true)
     end
     it 'all lists include name' do
-      get "/api/users/#{user.id}/lists", nil, 'HTTP_AUTHORIZATION' => key
+      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
       check_each_object(response_in_json, 'lists', 'name', true)
     end
     it 'all lists include user_id' do
-      get "/api/users/#{user.id}/lists", nil, 'HTTP_AUTHORIZATION' => key
+      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
       check_each_object(response_in_json, 'lists', 'user_id', true)
     end
     it 'all lists include permissions' do
-      get "/api/users/#{user.id}/lists", nil, 'HTTP_AUTHORIZATION' =>  key
+      get "/api/lists", nil, 'HTTP_AUTHORIZATION' =>  key
       check_each_object(response_in_json, 'lists', 'permissions', true)
     end
   end

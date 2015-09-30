@@ -7,47 +7,47 @@ RSpec.describe Api::ListsController, type: :controller do
   let(:api_key) { create(:api_key) }
   describe '#index' do
     before do
-      @lists = create_list(:list, 5, user: user)
+      @lists = create_list(:list, 5)
     end
     it 'responds with success to authenticated user' do
       http_key_auth
-      get :index, user_id: user.id
+      get :index
       expect(response).to have_http_status(:success)
     end
     it 'responds with unauthorized to unauthenticated user' do
-      get :index, user_id: user.id
+      get :index
       expect(response).to have_http_status(:unauthorized)
     end
     it 'responds with unauthorized to expired key' do
       api_key.expires_at = 1.day.ago
       api_key.save
       http_key_auth
-      get :index, user_id: user.id
+      get :index
       expect(response).to have_http_status(:unauthorized)
     end
     it 'responds with lists serialized in json' do
       http_key_auth
-      get :index, user_id: user.id
+      get :index
       expect(response_in_json['lists'].length).to eq(5)
     end
     it 'serialized json lists include id' do
       http_key_auth
-      get :index, user_id: user.id
+      get :index
       check_each_object(response_in_json, 'lists', 'id', true)
     end
     it 'serialized json lists include name' do
       http_key_auth
-      get :index, user_id: user.id
+      get :index
       check_each_object(response_in_json, 'lists', 'id', true)
     end
     it 'serialized json lists include permissions' do
       http_key_auth
-      get :index, user_id: user.id
+      get :index
       check_each_object(response_in_json, 'lists', 'id', true)
     end
     it 'serialized json lists include user_id' do
       http_key_auth
-      get :index, user_id: user.id
+      get :index
       check_each_object(response_in_json, 'lists', 'user_id', true)
     end
   end
