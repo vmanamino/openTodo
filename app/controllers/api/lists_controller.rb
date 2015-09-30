@@ -1,6 +1,11 @@
 class Api::ListsController < ApiController # rubocop:disable Style/ClassAndModuleChildren
   before_action :authenticated?, unless: :keyed_open
 
+  def index
+    lists = List.all
+    render json: lists, each_serializer: ListSerializer
+  end
+
   def create
     user = User.find(params[:user_id])
     list = List.new(list_params)

@@ -17,5 +17,8 @@ describe ApiKeySerializer, type: :serializer do
     it 'json expires_at attribute has value' do
       expect(@api_key_json['api_key']['expires_at']).not_to be nil
     end
+    it 'json excludes user' do
+      expect(@api_key_json['api_key']['user_id']).to be nil
+    end
   end
 end

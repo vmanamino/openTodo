@@ -14,7 +14,7 @@ RSpec.describe Api::ItemsController, type: :request do
     end
     it 'responds with object serialized in JSON' do
       post "/api/lists/#{list.id}/items", { item: { name: 'my item' } }, 'HTTP_AUTHORIZATION' => @key
-      expect(response_in_json.length).to eq(1)
+      expect(response_in_json['item']['name']).to eq('my item')
     end
     it 'serialized object includes id' do
       post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => @key
