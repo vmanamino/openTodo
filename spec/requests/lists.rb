@@ -49,8 +49,8 @@ RSpec.describe Api::ListsController, type: :request do
   end
   describe '#create request' do
     it 'responds with a list object serialized in JSON' do
-      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-      expect(response_in_json['list']['name']).to eq('my list')
+      post "/api/users/#{user.id}/lists", { list: { name: 'my new list' } }, 'HTTP_AUTHORIZATION' => key
+      expect(response_in_json['list']['name']).to eq('my new list')
     end
     it 'serialized list includes id' do
       post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key

@@ -10,7 +10,7 @@ RSpec.describe Api::ApiKeysController, type: :request do
   describe '#create request' do
     it 'responds with object serialized in json' do
       post '/api/api_keys', nil, 'HTTP_AUTHORIZATION' => credentials
-      expect(response_in_json.length).to eq(1)
+      expect(response_in_json['api_key']).not_to be nil
     end
     it 'serialized object includes access_token' do
       post '/api/api_keys', nil, 'HTTP_AUTHORIZATION' => credentials

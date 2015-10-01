@@ -19,7 +19,7 @@ RSpec.describe Api::ApiKeysController, type: :controller do
     it 'new item in JSON' do
       http_login
       post :create
-      expect(response_in_json.length).to eq(1)
+      expect(response_in_json['api_key']).not_to be nil
     end
     it 'includes access_token' do
       http_login

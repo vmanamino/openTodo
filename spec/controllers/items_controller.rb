@@ -71,8 +71,8 @@ RSpec.describe Api::ItemsController, type: :controller do
     end
     it 'new item in JSON' do
       http_key_auth
-      post :create, list_id: list.id, item: { name: 'get it done' }
-      expect(response_in_json.length).to eq(1)
+      post :create, list_id: list.id, item: { name: 'new thing to do' }
+      expect(response_in_json['item']['name']).to eq('new thing to do')
     end
     it 'includes id' do
       http_key_auth

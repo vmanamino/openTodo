@@ -49,8 +49,8 @@ RSpec.describe Api::UsersController, type: :request do
   end
   describe '#create request' do
     it 'responds with serialized user' do
-      post '/api/users', { user: { username: 'my name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-      expect(response_in_json['user']['username']).to eq('my name')
+      post '/api/users', { user: { username: 'my new name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+      expect(response_in_json['user']['username']).to eq('my new name')
     end
     it 'serialized user excludes private attribute' do
       post '/api/users', { user: { username: 'my name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
