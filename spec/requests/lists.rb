@@ -7,10 +7,50 @@ RSpec.describe Api::ListsController, type: :request do
   let(:user) { create(:user) }
   let(:api_key) { create(:api_key) }
   let(:key) { user_key(api_key.access_token) }
+  describe '#index request' do
+    before do
+      @lists = create_list(:list, 5)
+    end
+    it 'responds with success to key authenticated user' do
+      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
+      expect(response).to have_http_status(:success)
+    end
+    it 'responds with unauthorized to unauthenticated user' do
+      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => nil
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'responds with unauthorized to expired key' do
+      api_key.expires_at = 1.day.ago
+      api_key.save
+      key = user_key(api_key.access_token)
+      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'serializes all lists in json' do
+      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
+      expect(response_in_json['lists'].length).to eq(5)
+    end
+    it 'all lists include id' do
+      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
+      check_each_object(response_in_json, 'lists', 'id', true)
+    end
+    it 'all lists include name' do
+      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
+      check_each_object(response_in_json, 'lists', 'name', true)
+    end
+    it 'all lists include user_id' do
+      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
+      check_each_object(response_in_json, 'lists', 'user_id', true)
+    end
+    it 'all lists include permissions' do
+      get "/api/lists", nil, 'HTTP_AUTHORIZATION' =>  key
+      check_each_object(response_in_json, 'lists', 'permissions', true)
+    end
+  end
   describe '#create request' do
     it 'responds with a list object serialized in JSON' do
-      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-      expect(response_in_json.length).to eq(1)
+      post "/api/users/#{user.id}/lists", { list: { name: 'my new list' } }, 'HTTP_AUTHORIZATION' => key
+      expect(response_in_json['list']['name']).to eq('my new list')
     end
     it 'serialized list includes id' do
       post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key

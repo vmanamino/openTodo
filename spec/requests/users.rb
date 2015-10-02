@@ -5,7 +5,7 @@ include AuthHelper
 RSpec.describe Api::UsersController, type: :request do
   let(:controller) { Api::UsersController.new }
   let(:user) { create(:user) }
-  let(:api_key) { create(:api_key) }
+  let(:api_key) { create(:api_key, user: user) }
   let(:key) { user_key(api_key.access_token) }
   describe '#index request' do
     before do
@@ -21,7 +21,7 @@ RSpec.describe Api::UsersController, type: :request do
     end
     it 'responds with serialized users' do
       get '/api/users', nil, 'HTTP_AUTHORIZATION' => key
-      expect(response_in_json['users'].length).to eq(6)
+      expect(response_in_json['users'].length).to eq(6) # 1 extra for the user needed to create api_key
     end
     it 'serialized users exclude password' do
       get '/api/users', nil, 'HTTP_AUTHORIZATION' => key
@@ -48,38 +48,35 @@ RSpec.describe Api::UsersController, type: :request do
     end
   end
   describe '#create request' do
-    before do
-      @user = create(:user, username: 'my name', password: 'is special')
-    end
     it 'responds with serialized user' do
-      post '/api/users', { user: { username: @user.username, password: @user.password } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-      expect(response_in_json['user']['username']).to eq('my name')
+      post '/api/users', { user: { username: 'my new name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+      expect(response_in_json['user']['username']).to eq('my new name')
     end
     it 'serialized user excludes private attribute' do
-      post '/api/users', { user: { username: @user.username, password: @user.password } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+      post '/api/users', { user: { username: 'my name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
       check_object(response_in_json, 'password', false)
     end
     it 'serialized user includes id' do
-      post '/api/users', { user: { username: @user.username, password: @user.password } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+      post '/api/users', { user: { username: 'my name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
       check_object(response_in_json, 'id', true)
     end
     it 'serialized user includes username' do
-      post '/api/users', { user: { username: @user.username, password: @user.password } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+      post '/api/users', { user: { username: 'my name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
       check_object(response_in_json, 'username', true)
     end
     it 'username matches value given' do
-      post '/api/users', { user: { username: @user.username, password: @user.password } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-      expect(response_in_json['user']['username']).to eq(@user.username)
+      post '/api/users', { user: { username: 'my name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+      expect(response_in_json['user']['username']).to eq('my name')
     end
     it 'responds unauthorized to unauthenticated user' do
-      post '/api/users', { user: { username: @user.username, password: @user.password } }, 'HTTP_AUTHORIZATION' => nil
+      post '/api/users', { user: { username: 'my name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => nil
       expect(response).to have_http_status(:unauthorized)
     end
     it 'responds with unauthorized to expired key' do
       api_key.expires_at = 1.day.ago
       api_key.save
       key = user_key(api_key.access_token)
-      post '/api/users', { user: { username: @user.username, password: @user.password } }, 'HTTP_AUTHORIZATION' => key
+      post '/api/users', { user: { username: 'my name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key
       expect(response).to have_http_status(:unauthorized)
     end
   end

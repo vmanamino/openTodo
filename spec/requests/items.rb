@@ -8,50 +8,87 @@ RSpec.describe Api::ItemsController, type: :request do
   let(:controller) { Api::ItemsController.new }
   let(:api_key) { create(:api_key) }
   let(:key) { user_key(api_key.access_token) }
-  describe '#create request' do
+  describe '#index request' do
     before do
-      @key = user_key(api_key.access_token)
+      @items = create_list(:item, 5)
     end
+    it 'responds with success to key authenticated user' do
+      get "/api/items", nil, 'HTTP_AUTHORIZATION' => key
+      expect(response).to have_http_status(:success)
+    end
+    it 'responds with unauthorized to unauthenticated user' do
+      get "/api/items", nil, 'HTTP_AUTHORIZATION' => nil
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'responds with unauthorized to expired key' do
+      api_key.expires_at = 1.day.ago
+      api_key.save
+      key = user_key(api_key.access_token)
+      get "/api/items", nil, 'HTTP_AUTHORIZATION' => key
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'responds with all items in serialized json' do
+      get "/api/items", nil, 'HTTP_AUTHORIZATION' => key
+      expect(response_in_json['items'].length).to eq(5)
+    end
+    it 'serialized items include id' do
+      get "/api/items", nil, 'HTTP_AUTHORIZATION' => key
+      check_each_object(response_in_json, 'items', 'id', true)
+    end
+    it 'serialized items include name' do
+      get "/api/items", nil, 'HTTP_AUTHORIZATION' => key
+      check_each_object(response_in_json, 'items', 'name', true)
+    end
+    it 'serialized json includes done' do
+      get "/api/items", nil, 'HTTP_AUTHORIZATION' => key
+      check_each_object(response_in_json, 'items', 'done', true)
+    end
+    it 'serialized json includes list reference' do
+      get "/api/items", nil, 'HTTP_AUTHORIZATION' => key
+      check_each_object(response_in_json, 'items', 'list_id', true)
+    end
+  end
+  describe '#create request' do
     it 'responds with object serialized in JSON' do
-      post "/api/lists/#{list.id}/items", { item: { name: 'my item' } }, 'HTTP_AUTHORIZATION' => @key
-      expect(response_in_json.length).to eq(1)
+      post "/api/lists/#{list.id}/items", { item: { name: 'my item' } }, 'HTTP_AUTHORIZATION' => key
+      expect(response_in_json['item']['name']).to eq('my item')
     end
     it 'serialized object includes id' do
-      post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => @key
+      post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => key
       check_object(response_in_json, 'item', 'id', true)
     end
     it 'serialized object includes name' do
-      post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => @key
+      post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => key
       check_object(response_in_json, 'item', 'name', true)
     end
     it 'serialized object includes list_id' do
-      post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => @key
+      post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => key
       check_object(response_in_json, 'item', 'list_id', true)
     end
     it 'serialized object includes done' do
-      post "/api/lists/#{list.id}/items", { item: { name: 'get done on time' } }, 'HTTP_AUTHORIZATION' => @key
+      post "/api/lists/#{list.id}/items", { item: { name: 'get done on time' } }, 'HTTP_AUTHORIZATION' => key
       check_object(response_in_json, 'item', 'done', true)
     end
     it 'name matches name entered' do
-      post "/api/lists/#{list.id}/items", { item: { name: 'get done on time' } }, 'HTTP_AUTHORIZATION' => @key
+      post "/api/lists/#{list.id}/items", { item: { name: 'get done on time' } }, 'HTTP_AUTHORIZATION' => key
       expect(response_in_json['item']['name']).to eq('get done on time')
     end
     it 'list_id belongs to list in params' do
-      post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => @key
+      post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => key
       expect(response_in_json['item']['list_id']).to eq(list.id)
     end
     it 'done is set to false by default' do
-      post "/api/lists/#{list.id}/items", { item: { name: 'get it done' } }, 'HTTP_AUTHORIZATION' => @key
+      post "/api/lists/#{list.id}/items", { item: { name: 'get it done' } }, 'HTTP_AUTHORIZATION' => key
       expect(response_in_json['item']['done']).to eq(false)
     end
     it 'one item is created with id value' do
-      post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => @key
+      post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => key
       item = Item.all
       expect(item.length).to eq(1)
       expect(item[0][:id]).to_not be nil
     end
     it 'responds with success to authenticated user' do
-      post "/api/lists/#{list.id}/items", { item: { name: 'get it done' } }, 'HTTP_AUTHORIZATION' => @key
+      post "/api/lists/#{list.id}/items", { item: { name: 'get it done' } }, 'HTTP_AUTHORIZATION' => key
       expect(response).to have_http_status(:success)
     end
     it 'response unauthorized to unauthenticated user' do
@@ -62,11 +99,11 @@ RSpec.describe Api::ItemsController, type: :request do
       api_key.expires_at = 1.day.ago
       api_key.save
       key = user_key(api_key.access_token) # rubocop:disable Lint/UselessAssignment
-      post "/api/lists/#{list.id}/items", { item: { name: 'get it done' } }, 'HTTP_AUTHORIZATION' => @key
+      post "/api/lists/#{list.id}/items", { item: { name: 'get it done' } }, 'HTTP_AUTHORIZATION' => key
       expect(response).to have_http_status(:unauthorized)
     end
     it 'failure responds with appropriate message for absent name' do
-      post "/api/lists/#{list.id}/items", { item: { name: ' ' } }, 'HTTP_AUTHORIZATION' => @key
+      post "/api/lists/#{list.id}/items", { item: { name: ' ' } }, 'HTTP_AUTHORIZATION' => key
       expect(response_in_json['errors'][0]).to eq('Name can\'t be blank')
     end
   end

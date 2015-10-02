@@ -11,6 +11,7 @@ end
 # in dev use sqlite3 for active record
 group :development do
   gem 'sqlite3'
+  gem 'pry-rails'
 end
 
 # test frameworks
@@ -18,6 +19,7 @@ group :test do
   gem 'rspec-rails', '~> 3.0'
   gem 'capybara', '~> 2.3.0'
   gem 'shoulda-matchers', '~> 3.0.0.alpha'
+  gem 'pry-rails'
 end
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
