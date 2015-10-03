@@ -2,7 +2,8 @@ class Api::ListsController < ApiController # rubocop:disable Style/ClassAndModul
   before_action :authenticated?, unless: :keyed_open
 
   def index
-    lists = List.all
+    user = get_key_user
+    lists = List.visible_to(user)
     render json: lists, each_serializer: ListSerializer
   end
 

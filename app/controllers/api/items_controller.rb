@@ -1,5 +1,5 @@
 class Api::ItemsController < ApiController # rubocop:disable Style/ClassAndModuleChildren
-  before_action :authenticated?, unless: :keyed_open
+  before_action :authenticated?, unless: :keyed_open?
 
   def index
     items = Item.all

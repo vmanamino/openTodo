@@ -5,11 +5,13 @@ include AuthHelper
 RSpec.describe Api::ListsController, type: :request do
   let(:controller) { Api::ListsController.new }
   let(:user) { create(:user) }
-  let(:api_key) { create(:api_key) }
+  let(:api_key) { create(:api_key, user: user) }
   let(:key) { user_key(api_key.access_token) }
   describe '#index request' do
     before do
       @lists = create_list(:list, 5)
+      @lists_open = create_list(:list, 5, permissions: 'open')
+      @lists_private = create_list(:list, 5, permissions: 'private')
     end
     it 'responds with success to key authenticated user' do
       get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
@@ -26,23 +28,26 @@ RSpec.describe Api::ListsController, type: :request do
       get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
       expect(response).to have_http_status(:unauthorized)
     end
-    it 'serializes all lists in json' do
+    it 'lists permitted to key user are returned' do
+      lists_user = create_list(:list, 5, user: user)
+      lists_user_private = create_list(:list, 5, user: user, permissions: 'private')
       get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
-      expect(response_in_json['lists'].length).to eq(5)
+      expect(response_in_json['lists'].length).to eq(20)
+      expect(owned_or_permitted(response_in_json, 'List', 'lists', user)).to be true
     end
-    it 'all lists include id' do
+    it 'permitted lists include id' do
       get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
       check_each_object(response_in_json, 'lists', 'id', true)
     end
-    it 'all lists include name' do
+    it 'permitted lists include name' do
       get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
       check_each_object(response_in_json, 'lists', 'name', true)
     end
-    it 'all lists include user_id' do
+    it 'permitted lists include user_id' do
       get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
       check_each_object(response_in_json, 'lists', 'user_id', true)
     end
-    it 'all lists include permissions' do
+    it 'permitted lists include permissions' do
       get "/api/lists", nil, 'HTTP_AUTHORIZATION' =>  key
       check_each_object(response_in_json, 'lists', 'permissions', true)
     end

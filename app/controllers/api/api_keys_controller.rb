@@ -4,7 +4,7 @@ class Api::ApiKeysController < ApiController # rubocop:disable Style/ClassAndMod
 
   def create
     key = ApiKey.new
-    key.user = get_user
+    key.user = get_login_user
     if key.save
       render json: key
     else
