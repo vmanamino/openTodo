@@ -4,11 +4,14 @@ include JsonHelper
 
 RSpec.describe Api::ItemsController, type: :controller do
   let(:user) { create(:user) }
-  let(:api_key) { create(:api_key) }
-  let(:list) { create(:list) }
+  let(:api_key) { create(:api_key, user: user) }
+  let(:list) { create(:list, user: user) }
   describe '#index' do
     before do
-      @items = create_list(:item, 5)
+      @list_two = create(:list, user: user)
+      @items_list_one_user = create_list(:item, 5, list: list)
+      @items_list_two_user = create_list(:item, 5, list: @list_two)
+      @items_list_other = create_list(:item, 5)
     end
     it 'responds with success to key authenticated user' do
       http_key_auth
@@ -29,7 +32,19 @@ RSpec.describe Api::ItemsController, type: :controller do
     it 'responds with items in serialized json' do
       http_key_auth
       get :index
-      expect(response_in_json['items'].length).to eq(5)
+      expect(response_in_json['items'].length).to eq(10)
+    end
+    it 'serialized items all belong to owner' do
+      http_key_auth
+      get :index
+      expect(object_owner(response_in_json, 'Item', 'items', user)).to be true
+    end
+    it 'number of serialized items in response reflect ownership' do
+      http_key_auth
+      get :index
+      items_all = Item.all
+      expect(items_all.length).to eq(15)
+      expect(response_in_json['items'].length).to eq(10)
     end
     it 'serialized items include id' do
       http_key_auth

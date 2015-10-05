@@ -12,16 +12,14 @@ module JsonHelper
     expect(object[name].key?(attribute)).to be boolean
   end
 
-  def owned_or_permitted(collection, model, name, user)
+  def object_owner(collection, model, name, user)
     counter = 0
     my_model = Object.const_get(model)
-    while counter < collection.length
+    while counter < collection[name].length
       id = collection[name][counter]['id']
-      object = my_model.find_by(id)
+      object = my_model.find(id)
       owner = object.user
       if user.id == owner.id
-        return true
-      elsif collection[name][counter]['permissions'] != 'private'
         return true
       else
         return false
@@ -31,7 +29,7 @@ module JsonHelper
   end
 
   def response_in_json
-    #binding.pry
+    # binding.pry
     JSON.parse(response.body)
   end
 end

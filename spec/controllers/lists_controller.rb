@@ -8,6 +8,7 @@ RSpec.describe Api::ListsController, type: :controller do
   describe '#index' do
     before do
       @lists = create_list(:list, 5)
+      @lists_user = create_list(:list, 5, user: api_key.user) # total 10 lists, only 5 in response
     end
     it 'responds with success to authenticated user' do
       http_key_auth
@@ -28,6 +29,18 @@ RSpec.describe Api::ListsController, type: :controller do
     it 'responds with lists serialized in json' do
       http_key_auth
       get :index
+      expect(response_in_json['lists'].length).to eq(5)
+    end
+    it 'lists returned belong to key user' do
+      http_key_auth
+      get :index
+      expect(object_owner(response_in_json, 'List', 'lists', api_key.user)).to be true
+    end
+    it 'number of lists in response reflects ownership' do
+      http_key_auth
+      get :index
+      lists_all = List.all
+      expect(lists_all.length).to eq(10)
       expect(response_in_json['lists'].length).to eq(5)
     end
     it 'serialized json lists include id' do

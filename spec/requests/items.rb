@@ -6,11 +6,18 @@ RSpec.describe Api::ItemsController, type: :request do
   let(:list) { create(:list) }
   let(:user) { create(:user) }
   let(:controller) { Api::ItemsController.new }
-  let(:api_key) { create(:api_key) }
+  let(:api_key) { create(:api_key, user: user) }
   let(:key) { user_key(api_key.access_token) }
   describe '#index request' do
     before do
-      @items = create_list(:item, 5)
+      @list_one_user = create(:list, user: user)
+      @items_list_one_user = create_list(:item, 5, list: @list_one_user)
+      @list_two_user = create(:list, user: user)
+      @items_list_two_user = create_list(:item, 5, list: @list_two_user) # total 10 items in response
+      @list_one_other = create(:list)
+      @items_list_one_other = create_list(:item, 5, list: @list_one_other)
+      @list_two_other = create(:list)
+      @items_list_two_other = create_list(:item, 5, list: @list_two_other) # total 20 items in db
     end
     it 'responds with success to key authenticated user' do
       get "/api/items", nil, 'HTTP_AUTHORIZATION' => key
@@ -29,7 +36,17 @@ RSpec.describe Api::ItemsController, type: :request do
     end
     it 'responds with all items in serialized json' do
       get "/api/items", nil, 'HTTP_AUTHORIZATION' => key
-      expect(response_in_json['items'].length).to eq(5)
+      expect(response_in_json['items'].length).to eq(10)
+    end
+    it 'all items belong to key user' do
+      get "/api/items", nil, 'HTTP_AUTHORIZATION' => key
+      expect(object_owner(response_in_json, 'Item', 'items', user)).to be true
+    end
+    it 'number of items in response reflect ownership' do
+      get "/api/items", nil, 'HTTP_AUTHORIZATION' => key
+      items_all = Item.all
+      expect(items_all.length).to eq(20)
+      expect(response_in_json['items'].length).to eq(10)
     end
     it 'serialized items include id' do
       get "/api/items", nil, 'HTTP_AUTHORIZATION' => key

@@ -9,9 +9,12 @@ RSpec.describe Api::ListsController, type: :request do
   let(:key) { user_key(api_key.access_token) }
   describe '#index request' do
     before do
-      @lists = create_list(:list, 5)
-      @lists_open = create_list(:list, 5, permissions: 'open')
-      @lists_private = create_list(:list, 5, permissions: 'private')
+      @lists = create_list(:list, 5) # 5 lists
+      @lists_open = create_list(:list, 5, permissions: 'open') # + 5 lists = 10
+      @lists_private = create_list(:list, 5, permissions: 'private') # + 5 lists = 15 lists WILL NOT appear in request responses
+      @key_user = api_key.user
+      @lists_user = create_list(:list, 5, user: @key_user) # 5 lists
+      @lists_user_private = create_list(:list, 5, user: @key_user, permissions: 'private') # + 5 = 10 lists WILL appear in request responses
     end
     it 'responds with success to key authenticated user' do
       get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
@@ -28,12 +31,17 @@ RSpec.describe Api::ListsController, type: :request do
       get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
       expect(response).to have_http_status(:unauthorized)
     end
-    it 'lists permitted to key user are returned' do
-      lists_user = create_list(:list, 5, user: user)
-      lists_user_private = create_list(:list, 5, user: user, permissions: 'private')
+    it 'lists owned by key user are returned' do
       get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
-      expect(response_in_json['lists'].length).to eq(20)
-      expect(owned_or_permitted(response_in_json, 'List', 'lists', user)).to be true
+      expect(object_owner(response_in_json, 'List', 'lists', @key_user)).to be true
+    end
+    it 'lists owned by key user are 10' do
+      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
+      expect(response_in_json['lists'].length).to eq(10)
+    end
+    it 'lists created in total are 25' do
+      lists_all = List.all
+      expect(lists_all.length).to eq(25)
     end
     it 'permitted lists include id' do
       get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
