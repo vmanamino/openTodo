@@ -10,13 +10,13 @@ class List < ActiveRecord::Base
 
   after_initialize :defaults, if: :new_record?
 
-#   def self.visible_to(user)
-#     lists = []
-#     if user
-#       lists = List.where('user_id=? OR permissions!=?', user.id, 'private')
-#     end
-#     lists
-#   end
+  def self.own(id, user)
+    list = ''
+    if user
+      list = List.where('id=? AND user_id=?', id, user.id).first
+    end
+    list
+  end
 
   private
 

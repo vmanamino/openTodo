@@ -37,7 +37,7 @@ RSpec.describe Api::ItemsController, type: :controller do
     it 'serialized items all belong to owner' do
       http_key_auth
       get :index
-      expect(object_owner(response_in_json, 'Item', 'items', user)).to be true
+      object_owner(response_in_json, 'Item', 'items', user)
     end
     it 'number of serialized items in response reflect ownership' do
       http_key_auth

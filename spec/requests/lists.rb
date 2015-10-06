@@ -33,7 +33,7 @@ RSpec.describe Api::ListsController, type: :request do
     end
     it 'lists owned by key user are returned' do
       get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
-      expect(object_owner(response_in_json, 'List', 'lists', @key_user)).to be true
+      object_owner(response_in_json, 'List', 'lists', @key_user)
     end
     it 'lists owned by key user are 10' do
       get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key

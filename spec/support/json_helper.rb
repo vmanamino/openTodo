@@ -19,11 +19,7 @@ module JsonHelper
       id = collection[name][counter]['id']
       object = my_model.find(id)
       owner = object.user
-      if user.id == owner.id
-        return true
-      else
-        return false
-      end
+      expect(owner.id).to eq(user.id)
       counter += 1
     end
   end

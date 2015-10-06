@@ -40,7 +40,7 @@ RSpec.describe Api::ItemsController, type: :request do
     end
     it 'all items belong to key user' do
       get "/api/items", nil, 'HTTP_AUTHORIZATION' => key
-      expect(object_owner(response_in_json, 'Item', 'items', user)).to be true
+      object_owner(response_in_json, 'Item', 'items', user)
     end
     it 'number of items in response reflect ownership' do
       get "/api/items", nil, 'HTTP_AUTHORIZATION' => key

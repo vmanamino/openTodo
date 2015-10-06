@@ -34,7 +34,7 @@ RSpec.describe Api::ListsController, type: :controller do
     it 'lists returned belong to key user' do
       http_key_auth
       get :index
-      expect(object_owner(response_in_json, 'List', 'lists', api_key.user)).to be true
+      object_owner(response_in_json, 'List', 'lists', api_key.user)
     end
     it 'number of lists in response reflects ownership' do
       http_key_auth
