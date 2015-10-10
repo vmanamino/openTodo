@@ -4,7 +4,7 @@ include JsonHelper
 
 RSpec.describe Api::ListsController, type: :controller do
   let(:user) { create(:user) }
-  let(:api_key) { create(:api_key) }
+  let(:api_key) { create(:api_key, user: user) }
   describe '#index' do
     before do
       @lists = create_list(:list, 5)
@@ -131,6 +131,22 @@ RSpec.describe Api::ListsController, type: :controller do
       post :create, user_id: user.id, list: { name: ' ' }
       expect(response_in_json['errors'][0]).to eq('Name can\'t be blank')
     end
+    it 'list user is key user' do
+      http_key_auth
+      post :create, user_id: user.id, list: { name: 'my list' }
+      expect(response_in_json['list']['user_id']).to eq(api_key.user.id)
+    end
+    it 'params user is list user' do
+      http_key_auth
+      post :create, user_id: user.id, list: { name: 'my list' }
+      expect(response_in_json['list']['user_id']).to eq(user.id)
+    end
+    it 'responds with unprocessable entity when key user not user in params' do
+      user_other = create(:user)
+      http_key_auth
+      post :create, user_id: user_other.id, list: { name: 'my list'}
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
   end
   describe '#update' do
     before do
@@ -207,13 +223,7 @@ RSpec.describe Api::ListsController, type: :controller do
     end
     it 'raises exception status not found' do
       http_key_auth
-      delete :destroy, user_id: user.id, id: 100
-      expect(response).to have_http_status(:not_found)
-    end
-    it 'raises not found code 404' do
-      http_key_auth
-      delete :destroy, user_id: user.id, id: 100
-      expect(response.status).to eq(404)
+      expect { delete :destroy, user_id: user.id, id: 100 }.to raise_exception(ActiveRecord::RecordNotFound)
     end
     it 'destroys item dependents' do
       items = Item.all

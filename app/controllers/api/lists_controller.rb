@@ -7,10 +7,11 @@ class Api::ListsController < ApiController # rubocop:disable Style/ClassAndModul
   end
 
   def create
-    user = User.find(params[:user_id])
+    user = get_key_user
     list = List.new(list_params)
     list.user_id = user.id
-    if list.save
+    params_user = User.find(params[:user_id])
+    if list.save && (user.id == params_user.id)
       render json: list
     else
       render json: { errors: list.errors.full_messages }, status: :unprocessable_entity
@@ -18,28 +19,22 @@ class Api::ListsController < ApiController # rubocop:disable Style/ClassAndModul
   end
 
   def update
-    list = List.own(params[:id], get_key_user)
-    if list
-      if list.update_attributes(list_params)
-        render json: list
-      else
-        render json: { errors: list.errors.full_messages }, status: :unprocessable_entity
-      end
+    user = get_key_user # assign user to variable for readability
+    list = List.visible_to(user).find(params[:id])
+    if list.update_attributes(list_params)
+      render json: list
     else
-      render json: {}, status: :not_found
+      render json: { errors: list.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def destroy
-    list = List.find(params[:id])
-    key_owner = get_key_user
-    record_owner = User.find(list.user.id)
-    if key_owner.id == record_owner.id
-      list.destroy
+    user = get_key_user
+    list = List.visible_to(user).find(params[:id])
+    if list.destroy
       render json: {}, status: :no_content
     else
-      ActiveRecord::RecordNotFound
-      render json: {}, status: :not_found
+      render json: { errors: list.errors.full_messages }, status: :not_found
     end
   end
 

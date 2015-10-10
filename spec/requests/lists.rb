@@ -77,9 +77,20 @@ RSpec.describe Api::ListsController, type: :request do
       post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
       check_object(response_in_json, 'list', 'user_id', true)
     end
-    it 'user_id belongs to user' do
+    it 'list user is key user' do
+      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
+      key_user = api_key.user
+      expect(response_in_json['list']['user_id']).to eq(key_user.id)
+    end
+    it 'params user is list user' do
       post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
       expect(response_in_json['list']['user_id']).to eq(user.id)
+    end
+    it 'responds with unprocessable entity when key user not user in params' do
+      key_other = create(:api_key)
+      key = user_key(key_other.access_token)
+      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
+      expect(response).to have_http_status(:unprocessable_entity)
     end
     it 'permissions automatically set to viewable' do
       post "/api/users/#{user.id}/lists", { list: {  name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
@@ -146,6 +157,11 @@ RSpec.describe Api::ListsController, type: :request do
       patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
       expect(response).to have_http_status(:unauthorized)
     end
+    it 'responds with ActiveRecord error to user other than list user' do
+      key_other = create(:api_key)
+      key = user_key(key_other.access_token)
+      expect { patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private'} }, 'HTTP_AUTHORIZATION' => key }.to raise_exception(ActiveRecord::RecordNotFound) # rubocop:disable Metrics/LineLength
+    end
   end
   describe '#destroy request' do
     before do
@@ -160,10 +176,6 @@ RSpec.describe Api::ListsController, type: :request do
       delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
       expect(response.status).to eq(204)
     end
-    it 'responds with unauthorized to unauthenticated user' do
-      delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => nil
-      expect(response).to have_http_status(:unauthorized)
-    end
     it 'responds with status code 401 to unauthenticated user' do
       delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => nil
       expect(response.status).to eq(401)
@@ -175,13 +187,13 @@ RSpec.describe Api::ListsController, type: :request do
       delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
       expect(response).to have_http_status(:unauthorized)
     end
-    it 'raises exception status not_found' do
-      delete "/api/users/#{user.id}/lists/100", nil, 'HTTP_AUTHORIZATION' => key
-      expect(response).to have_http_status(:not_found)
+    it 'raises exception status not_found for missing list' do
+      expect { delete "/api/users/#{user.id}/lists/100", nil, 'HTTP_AUTHORIZATION' => key }.to raise_exception(ActiveRecord::RecordNotFound)
     end
-    it 'raises code 404 for exception' do
-      delete "/api/users/#{user.id}/lists/100", nil, 'HTTP_AUTHORIZATION' => key
-      expect(response.status).to eq(404)
+    it 'raises ActiveRecord error to user other than list user' do
+      key_other = create(:api_key)
+      key = user_key(key_other.access_token)
+      expect{ delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key }.to raise_exception(ActiveRecord::RecordNotFound)
     end
     it 'destroys item dependents' do
       items = Item.all

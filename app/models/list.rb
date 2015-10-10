@@ -5,18 +5,9 @@ class List < ActiveRecord::Base
   has_many :items, dependent: :destroy
 
   validates :name, presence: true
-  # validates_inclusion_of :permissions, in: %w( viewable private open ), allow_nil: false
   validates :permissions, inclusion: %w( viewable private open ), allow_nil: false
 
   after_initialize :defaults, if: :new_record?
-
-  def self.own(id, user)
-    list = ''
-    if user
-      list = List.where('id=? AND user_id=?', id, user.id).first
-    end
-    list
-  end
 
   private
 
