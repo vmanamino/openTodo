@@ -41,4 +41,27 @@ class ApiController < ApplicationController
     end
     user
   end
+
+  def authorization
+    key_owner = get_key_user
+    controller = params[:controller]
+    # name = Object.const_get(controller)
+    controller_name = /api\/([a-z]+)/.match(controller)[1]
+    # model_name = controller_name.singularize
+    # model = model_name.capitalize
+    # my_Model = Object.const_get(model)
+    if controller_name == 'items'
+      list = List.find(params[:list_id])
+      unless list.user.id == key_owner.id
+        render json: { message: 'you are not the list owner' }, status: :unauthorized
+      end
+    elsif controller_name == 'lists'
+      user = User.find(params[:user_id])
+      unless user.id == key_owner.id
+        render json: { message: 'you are not the owner of the requested list' }, status: :unauthorized
+      end
+    else
+      render json: { message: 'you are not authorized to this action'}, status: :unauthorized
+    end
+  end
 end

@@ -1,23 +1,51 @@
 {
   "RSpec": {
     "coverage": {
-      "/home/action/code/openTodo/app/models/list.rb": [
+      "/home/action/code/openTodo/app/serializers/api_key_serializer.rb": [
         1,
-        2,
+        1,
+        null
+      ],
+      "/home/action/code/openTodo/app/serializers/item_serializer.rb": [
+        1,
+        1,
+        null
+      ],
+      "/home/action/code/openTodo/app/serializers/list_serializer.rb": [
+        1,
+        1,
+        null
+      ],
+      "/home/action/code/openTodo/app/serializers/user_serializer.rb": [
+        1,
+        1,
+        null
+      ],
+      "/home/action/code/openTodo/app/models/api_key.rb": [
+        1,
+        1,
+        null,
+        1,
         null,
         1,
         1,
         null,
         1,
-        1,
+        4,
+        null,
         null,
         1,
         null,
         1,
+        4,
+        null,
+        4,
+        4,
+        4,
+        null,
         null,
         1,
-        null,
-        27,
+        4,
         null,
         null
       ],
@@ -26,6 +54,26 @@
         1,
         1,
         1,
+        null
+      ],
+      "/home/action/code/openTodo/app/models/list.rb": [
+        1,
+        1,
+        null,
+        1,
+        1,
+        null,
+        1,
+        1,
+        null,
+        1,
+        null,
+        1,
+        null,
+        1,
+        null,
+        7,
+        null,
         null
       ],
       "/home/action/code/openTodo/app/models/item.rb": [
@@ -60,11 +108,11 @@
         1,
         null,
         1,
-        0,
+        4,
         null,
         null
       ]
     },
-    "timestamp": 1444459221
+    "timestamp": 1444541272
   }
 }

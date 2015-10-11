@@ -86,12 +86,6 @@ RSpec.describe Api::ListsController, type: :request do
       post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
       expect(response_in_json['list']['user_id']).to eq(user.id)
     end
-    it 'responds with unprocessable entity when key user not user in params' do
-      key_other = create(:api_key)
-      key = user_key(key_other.access_token)
-      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-      expect(response).to have_http_status(:unprocessable_entity)
-    end
     it 'permissions automatically set to viewable' do
       post "/api/users/#{user.id}/lists", { list: {  name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
       expect(response_in_json['list']['permissions']).to eq('viewable')
@@ -118,6 +112,18 @@ RSpec.describe Api::ListsController, type: :request do
     it 'failure responds with appropriate error message for absent name' do
       post "/api/users/#{user.id}/lists", { list: { name: ' ' } }, 'HTTP_AUTHORIZATION' => key
       expect(response_in_json['errors'][0]).to eq('Name can\'t be blank')
+    end
+    it 'responds with unauthorized when key user is not the params user' do
+      api_key_other = create(:api_key)
+      key = user_key(api_key_other.access_token)
+      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'responds with appropriate message when key user is not params user' do
+      api_key_other = create(:api_key)
+      key = user_key(api_key_other.access_token)
+      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
+      expect(response_in_json['message']).to eq('you are not the owner of the requested list')
     end
   end
   describe '#update request' do
@@ -157,10 +163,17 @@ RSpec.describe Api::ListsController, type: :request do
       patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
       expect(response).to have_http_status(:unauthorized)
     end
-    it 'responds with ActiveRecord error to user other than list user' do
-      key_other = create(:api_key)
-      key = user_key(key_other.access_token)
-      expect { patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private'} }, 'HTTP_AUTHORIZATION' => key }.to raise_exception(ActiveRecord::RecordNotFound) # rubocop:disable Metrics/LineLength
+    it 'responds with unauthorized when key user is not the list user' do
+      api_key_other = create(:api_key)
+      key = user_key(api_key_other.access_token)
+      patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'responds with the appropriate message when key user is not the list user' do
+      api_key_other = create(:api_key)
+      key = user_key(api_key_other.access_token)
+      patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list' } }, 'HTTP_AUTHORIZATION' => key
+      expect(response_in_json['message']).to eq('you are not the owner of the requested list')
     end
   end
   describe '#destroy request' do
@@ -190,10 +203,17 @@ RSpec.describe Api::ListsController, type: :request do
     it 'raises exception status not_found for missing list' do
       expect { delete "/api/users/#{user.id}/lists/100", nil, 'HTTP_AUTHORIZATION' => key }.to raise_exception(ActiveRecord::RecordNotFound)
     end
-    it 'raises ActiveRecord error to user other than list user' do
+    it 'responds with unauthorized when key user is not list user' do
       key_other = create(:api_key)
       key = user_key(key_other.access_token)
-      expect{ delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key }.to raise_exception(ActiveRecord::RecordNotFound)
+      delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'responds with appropriate message when key user is not list user' do
+      key_other = create(:api_key)
+      key = user_key(key_other.access_token)
+      delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
+      expect(response_in_json['message']).to eq('you are not the owner of the requested list')
     end
     it 'destroys item dependents' do
       items = Item.all

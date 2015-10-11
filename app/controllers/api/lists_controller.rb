@@ -1,5 +1,6 @@
 class Api::ListsController < ApiController # rubocop:disable Style/ClassAndModuleChildren
   before_action :authenticated?, unless: :keyed_open
+  before_action :authorization, only: [:create, :update, :destroy]
   def index
     user = get_key_user
     lists = List.visible_to(user)
@@ -11,7 +12,7 @@ class Api::ListsController < ApiController # rubocop:disable Style/ClassAndModul
     list = List.new(list_params)
     list.user_id = user.id
     params_user = User.find(params[:user_id])
-    if list.save && (user.id == params_user.id)
+    if list.save # && (user.id == params_user.id)
       render json: list
     else
       render json: { errors: list.errors.full_messages }, status: :unprocessable_entity

@@ -1,27 +1,22 @@
 required simplecov
-Run options: include {:locations=>{"./spec/controllers/lists_controller.rb"=>[213]}}
+Run options: include {:locations=>{"./spec/requests/items.rb"=>[175]}}
 F
 
 Failures:
 
-  1) Api::ListsController#destroy raises exception status not found
-     Failure/Error: delete :destroy, user_id: user.id, id: 100
-     ActiveRecord::RecordNotFound:
-       Couldn't find List with 'id'=100 [WHERE "lists"."user_id" = ?]
-     # /home/action/.gem/ruby/2.1.1/gems/activerecord-4.2.1/lib/active_record/relation/finder_methods.rb:336:in `raise_record_not_found_exception!'
-     # /home/action/.gem/ruby/2.1.1/gems/activerecord-4.2.1/lib/active_record/relation/finder_methods.rb:456:in `find_one'
-     # /home/action/.gem/ruby/2.1.1/gems/activerecord-4.2.1/lib/active_record/relation/finder_methods.rb:435:in `find_with_ids'
-     # /home/action/.gem/ruby/2.1.1/gems/activerecord-4.2.1/lib/active_record/relation/finder_methods.rb:71:in `find'
-     # ./app/controllers/api/lists_controller.rb:33:in `destroy'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/metal/implicit_render.rb:4:in `send_action'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/abstract_controller/base.rb:198:in `process_action'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/metal/rendering.rb:10:in `process_action'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/abstract_controller/callbacks.rb:20:in `block in process_action'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:117:in `call'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:117:in `call'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:555:in `block (2 levels) in compile'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:505:in `call'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:505:in `call'
+  1) Api::ItemsController#update request responds with unauthorized when key user is not item list user
+     Failure/Error: patch "/api/lists/#{list.id}/items/#{@item_update.id}", { item: { name: 'my finished item', done: true } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+     NameError:
+       wrong constant name api/items
+     # ./app/controllers/api_controller.rb:48:in `const_get'
+     # ./app/controllers/api_controller.rb:48:in `authorization'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:432:in `block in make_lambda'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:145:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:145:in `block in halting_and_conditional'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:504:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:504:in `block in call'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:504:in `each'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:504:in `call'
      # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:92:in `_run_callbacks'
      # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:776:in `_run_process_action_callbacks'
      # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:81:in `run_callbacks'
@@ -36,16 +31,64 @@ Failures:
      # /home/action/.gem/ruby/2.1.1/gems/activerecord-4.2.1/lib/active_record/railties/controller_runtime.rb:18:in `process_action'
      # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/abstract_controller/base.rb:137:in `process'
      # /home/action/.gem/ruby/2.1.1/gems/actionview-4.2.1/lib/action_view/rendering.rb:30:in `process'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/test_case.rb:632:in `process'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/test_case.rb:65:in `process'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/test_case.rb:532:in `delete'
-     # ./spec/controllers/lists_controller.rb:215:in `block (3 levels) in <top (required)>'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/metal.rb:196:in `dispatch'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/metal/rack_delegation.rb:13:in `dispatch'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/metal.rb:237:in `block in action'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/routing/route_set.rb:74:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/routing/route_set.rb:74:in `dispatch'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/routing/route_set.rb:43:in `serve'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/journey/router.rb:43:in `block in serve'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/journey/router.rb:30:in `each'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/journey/router.rb:30:in `serve'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/routing/route_set.rb:819:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/rack-1.6.4/lib/rack/etag.rb:24:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/rack-1.6.4/lib/rack/conditionalget.rb:38:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/rack-1.6.4/lib/rack/head.rb:13:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/middleware/params_parser.rb:27:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/middleware/flash.rb:260:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/rack-1.6.4/lib/rack/session/abstract/id.rb:225:in `context'
+     # /home/action/.gem/ruby/2.1.1/gems/rack-1.6.4/lib/rack/session/abstract/id.rb:220:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/middleware/cookies.rb:560:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/activerecord-4.2.1/lib/active_record/query_cache.rb:36:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/activerecord-4.2.1/lib/active_record/connection_adapters/abstract/connection_pool.rb:649:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/middleware/callbacks.rb:29:in `block in call'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:88:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:88:in `_run_callbacks'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:776:in `_run_call_callbacks'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:81:in `run_callbacks'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/middleware/callbacks.rb:27:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/middleware/remote_ip.rb:78:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/middleware/debug_exceptions.rb:17:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/web-console-2.2.1/lib/web_console/middleware.rb:39:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/middleware/show_exceptions.rb:30:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/railties-4.2.1/lib/rails/rack/logger.rb:38:in `call_app'
+     # /home/action/.gem/ruby/2.1.1/gems/railties-4.2.1/lib/rails/rack/logger.rb:20:in `block in call'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/tagged_logging.rb:68:in `block in tagged'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/tagged_logging.rb:26:in `tagged'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/tagged_logging.rb:68:in `tagged'
+     # /home/action/.gem/ruby/2.1.1/gems/railties-4.2.1/lib/rails/rack/logger.rb:20:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/middleware/request_id.rb:21:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/rack-1.6.4/lib/rack/methodoverride.rb:22:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/rack-1.6.4/lib/rack/runtime.rb:18:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/cache/strategy/local_cache_middleware.rb:28:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/rack-1.6.4/lib/rack/lock.rb:17:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/middleware/static.rb:113:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/rack-1.6.4/lib/rack/sendfile.rb:113:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/railties-4.2.1/lib/rails/engine.rb:518:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/railties-4.2.1/lib/rails/application.rb:164:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/rack-test-0.6.3/lib/rack/mock_session.rb:30:in `request'
+     # /home/action/.gem/ruby/2.1.1/gems/rack-test-0.6.3/lib/rack/test.rb:244:in `process_request'
+     # /home/action/.gem/ruby/2.1.1/gems/rack-test-0.6.3/lib/rack/test.rb:124:in `request'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/testing/integration.rb:297:in `process'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/testing/integration.rb:44:in `patch'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/testing/integration.rb:344:in `block (2 levels) in <module:Runner>'
+     # ./spec/requests/items.rb:178:in `block (3 levels) in <top (required)>'
 
-Finished in 0.07797 seconds (files took 2.48 seconds to load)
+Finished in 0.09043 seconds (files took 2.37 seconds to load)
 1 example, 1 failure
 
 Failed examples:
 
-rspec ./spec/controllers/lists_controller.rb:213 # Api::ListsController#destroy raises exception status not found
+rspec ./spec/requests/items.rb:175 # Api::ItemsController#update request responds with unauthorized when key user is not item list user
 
-Coverage report generated for RSpec to /home/action/code/openTodo/coverage. 68 / 108 LOC (62.96%) covered.
+Coverage report generated for RSpec to /home/action/code/openTodo/coverage. 70 / 110 LOC (63.64%) covered.

@@ -3,8 +3,8 @@ include AuthHelper
 include JsonHelper
 
 RSpec.describe Api::ItemsController, type: :request do
-  let(:list) { create(:list) }
   let(:user) { create(:user) }
+  let(:list) { create(:list, user: user) }
   let(:controller) { Api::ItemsController.new }
   let(:api_key) { create(:api_key, user: user) }
   let(:key) { user_key(api_key.access_token) }
@@ -123,6 +123,18 @@ RSpec.describe Api::ItemsController, type: :request do
       post "/api/lists/#{list.id}/items", { item: { name: ' ' } }, 'HTTP_AUTHORIZATION' => key
       expect(response_in_json['errors'][0]).to eq('Name can\'t be blank')
     end
+    it 'responds with unauthorized when key user not owner of item list' do
+      api_key_other = create(:api_key)
+      key = user_key(api_key_other.access_token)
+      post "/api/lists/#{list.id}/items", { item: { name: 'my item'} }, 'HTTP_AUTHORIZATION' => key
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'responds with appropriate message when key user not owner of item list' do
+      api_key_other = create(:api_key)
+      key = user_key(api_key_other.access_token)
+      post "/api/lists/#{list.id}/items", { item: { name: 'my item'} }, 'HTTP_AUTHORIZATION' => key
+      expect(response_in_json['message']).to eq('you are not the list owner')
+    end
   end
   describe '#update request' do
     before do
@@ -159,6 +171,18 @@ RSpec.describe Api::ItemsController, type: :request do
       key = user_key(api_key.access_token)
       patch "/api/lists/#{list.id}/items/#{@item_update.id}", { item: { name: 'my finished item', done: true } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
       expect(response).to have_http_status(:unauthorized)
+    end
+    it 'responds with unauthorized when key user is not item list user' do
+      api_key_other = create(:api_key)
+      key = user_key(api_key_other.access_token)
+      patch "/api/lists/#{list.id}/items/#{@item_update.id}", { item: { name: 'my finished item', done: true } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'responds with appropriate message when key user is not item list user' do
+      api_key_other = create(:api_key)
+      key = user_key(api_key_other.access_token)
+      patch "/api/lists/#{list.id}/items/#{@item_update.id}", { item: { name: 'my finished item', done: true } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+      expect(response_in_json['message']).to eq('you are not the list owner')
     end
   end
 end

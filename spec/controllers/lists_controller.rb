@@ -141,11 +141,17 @@ RSpec.describe Api::ListsController, type: :controller do
       post :create, user_id: user.id, list: { name: 'my list' }
       expect(response_in_json['list']['user_id']).to eq(user.id)
     end
-    it 'responds with unprocessable entity when key user not user in params' do
+    it 'responds with unauthorized when key user not user in params' do
       user_other = create(:user)
       http_key_auth
       post :create, user_id: user_other.id, list: { name: 'my list'}
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'responds with appropriate message when key user not user in params' do
+      user_other = create(:user)
+      http_key_auth
+      post :create, user_id: user_other.id, list: { name: 'my list' }
+      expect(response_in_json['message']).to eq('you are not the owner of the requested list')
     end
   end
   describe '#update' do
@@ -190,6 +196,22 @@ RSpec.describe Api::ListsController, type: :controller do
       patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'cannot be updated' } # rubocop:disable Metrics/LineLength
       expect(response).to have_http_status(:unauthorized)
     end
+    it 'responds with unauthorized when key user is not list user' do
+      other_user = create(:user)
+      api_key.user = other_user
+      api_key.save
+      http_key_auth
+      patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'private'}
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'responds with appropriate message when key user is not list user' do
+      other_user = create(:user)
+      api_key.user = other_user
+      api_key.save
+      http_key_auth
+      patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'private'}
+      expect(response_in_json['message']).to eq('you are not the owner of the requested list')
+    end
   end
   describe '#destroy' do
     before do
@@ -224,6 +246,22 @@ RSpec.describe Api::ListsController, type: :controller do
     it 'raises exception status not found' do
       http_key_auth
       expect { delete :destroy, user_id: user.id, id: 100 }.to raise_exception(ActiveRecord::RecordNotFound)
+    end
+    it 'responds with unauthorized when key user is not list user' do
+      user_other = create(:user)
+      api_key.user = user_other
+      api_key.save
+      http_key_auth
+      delete :destroy, user_id: user.id, id: @list_destroy.id
+      expect(response).to have_http_status(:unauthorized)
+    end
+    it 'responds with appopriate message when key user is not list user' do
+      user_other = create(:user)
+      api_key.user = user_other
+      api_key.save
+      http_key_auth
+      delete :destroy, user_id: user.id, id: @list_destroy.id
+      expect(response_in_json['message']).to eq('you are not the owner of the requested list')
     end
     it 'destroys item dependents' do
       items = Item.all
