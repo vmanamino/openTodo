@@ -11,8 +11,7 @@ class Api::ListsController < ApiController # rubocop:disable Style/ClassAndModul
     user = get_key_user
     list = List.new(list_params)
     list.user_id = user.id
-    params_user = User.find(params[:user_id])
-    if list.save # && (user.id == params_user.id)
+    if list.save
       render json: list
     else
       render json: { errors: list.errors.full_messages }, status: :unprocessable_entity

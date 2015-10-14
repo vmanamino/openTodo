@@ -1,4 +1,5 @@
 require 'rails_helper'
+
 include JsonHelper
 include AuthHelper
 
@@ -102,12 +103,15 @@ RSpec.describe Api::ListsController, type: :request do
       post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => nil
       expect(response).to have_http_status(:unauthorized)
     end
-    it 'responds with unauthorized to expired key' do
-      api_key.expires_at = 1.day.ago
-      api_key.save
-      key = user_key(api_key.access_token)
-      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-      expect(response).to have_http_status(:unauthorized)
+    # it 'responds with unauthorized to expired key' do
+    context 'create with expired key' do
+      it_behaves_like 'expired key', {:create => :post}, "/api/users/1/lists", List, { list: { name: 'my list' } }, :api_key
+#       api_key.expires_at = 1.day.ago
+#       api_key.save
+#       key = user_key(api_key.access_token)
+#       post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
+#       expect(response).to have_http_status(:unauthorized)
+    # end
     end
     it 'failure responds with appropriate error message for absent name' do
       post "/api/users/#{user.id}/lists", { list: { name: ' ' } }, 'HTTP_AUTHORIZATION' => key
