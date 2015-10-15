@@ -25,13 +25,16 @@ RSpec.describe Api::ListsController, type: :request do
       get "/api/lists", nil, 'HTTP_AUTHORIZATION' => nil
       expect(response).to have_http_status(:unauthorized)
     end
-    it 'responds with unauthorized to expired key' do
-      api_key.expires_at = 1.day.ago
-      api_key.save
-      key = user_key(api_key.access_token)
-      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
-      expect(response).to have_http_status(:unauthorized)
+    context 'expired key' do
+      it_behaves_like 'expired key', { :index => :get }, "/api/lists", List, nil, :api_key
     end
+#     it 'responds with unauthorized to expired key' do
+#       api_key.expires_at = 1.day.ago
+#       api_key.save
+#       key = user_key(api_key.access_token)
+#       get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
+#       expect(response).to have_http_status(:unauthorized)
+#     end
     it 'lists owned by key user are returned' do
       get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
       object_owner(response_in_json, 'List', 'lists', @key_user)
@@ -160,13 +163,16 @@ RSpec.describe Api::ListsController, type: :request do
       patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => nil # rubocop:disable Metrics/LineLength
       expect(response).to have_http_status(:unauthorized)
     end
-    it 'responds with unauthorized to expired key' do
-      api_key.expires_at = 1.day.ago
-      api_key.save
-      key = user_key(api_key.access_token)
-      patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-      expect(response).to have_http_status(:unauthorized)
+    context 'with expired key' do
+      it_behaves_like 'expired key', { :update => :patch }, "/api/users/2/lists/2", List, { list: { name: 'my new list', permissions: 'private' } }, :api_key
     end
+#     it 'responds with unauthorized to expired key' do
+#       api_key.expires_at = 1.day.ago
+#       api_key.save
+#       key = user_key(api_key.access_token)
+#       patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+#       expect(response).to have_http_status(:unauthorized)
+#     end
     it 'responds with unauthorized when key user is not the list user' do
       api_key_other = create(:api_key)
       key = user_key(api_key_other.access_token)
