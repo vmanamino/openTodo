@@ -27,12 +27,8 @@ RSpec.describe Api::ItemsController, type: :request do
       get "/api/items", nil, 'HTTP_AUTHORIZATION' => nil
       expect(response).to have_http_status(:unauthorized)
     end
-    it 'responds with unauthorized to expired key' do
-      api_key.expires_at = 1.day.ago
-      api_key.save
-      key = user_key(api_key.access_token)
-      get "/api/items", nil, 'HTTP_AUTHORIZATION' => key
-      expect(response).to have_http_status(:unauthorized)
+    context 'with expired key' do
+      it_behaves_like 'expired key', 'item', { :index => :get }, nil
     end
     it 'responds with all items in serialized json' do
       get "/api/items", nil, 'HTTP_AUTHORIZATION' => key
@@ -112,12 +108,8 @@ RSpec.describe Api::ItemsController, type: :request do
       post "/api/lists/#{list.id}/items", { item: { name: 'get it done' } }, 'HTTP_AUTHORIZATION' => nil
       expect(response).to have_http_status(:unauthorized)
     end
-    it 'responds with unauthorized to expired key' do
-      api_key.expires_at = 1.day.ago
-      api_key.save
-      key = user_key(api_key.access_token) # rubocop:disable Lint/UselessAssignment
-      post "/api/lists/#{list.id}/items", { item: { name: 'get it done' } }, 'HTTP_AUTHORIZATION' => key
-      expect(response).to have_http_status(:unauthorized)
+    context 'with expired key' do
+      it_behaves_like 'expired key', 'item', { :create => :post }, { item: { name: 'get it done' } }
     end
     it 'failure responds with appropriate message for absent name' do
       post "/api/lists/#{list.id}/items", { item: { name: ' ' } }, 'HTTP_AUTHORIZATION' => key
@@ -165,12 +157,8 @@ RSpec.describe Api::ItemsController, type: :request do
       patch "/api/lists/#{list.id}/items/#{@item_update.id}", { item: { name: 'my finished item', done: true } }, 'HTTP_AUTHORIZATION' =>  nil # rubocop:disable Metrics/LineLength
       expect(response).to have_http_status(:unauthorized)
     end
-    it 'responds with unauthorized to expired key' do
-      api_key.expires_at = 1.day.ago
-      api_key.save
-      key = user_key(api_key.access_token)
-      patch "/api/lists/#{list.id}/items/#{@item_update.id}", { item: { name: 'my finished item', done: true } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-      expect(response).to have_http_status(:unauthorized)
+    context 'with expired key' do
+      it_behaves_like 'expired key', 'item', { :update => :patch }, { item: { name: 'my finished item', done: true } }
     end
     it 'responds with unauthorized when key user is not item list user' do
       api_key_other = create(:api_key)

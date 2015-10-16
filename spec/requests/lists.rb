@@ -17,54 +17,49 @@ RSpec.describe Api::ListsController, type: :request do
       @lists_user = create_list(:list, 5, user: @key_user) # 5 lists
       @lists_user_private = create_list(:list, 5, user: @key_user, permissions: 'private') # + 5 = 10 lists WILL appear in request responses
     end
-    it 'responds with success to key authenticated user' do
-      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
-      expect(response).to have_http_status(:success)
+    context 'user with valid key' do
+      it_behaves_like 'authenticated user', 'list', { :index => :get }, nil
+      it 'lists owned by key user returned' do
+        get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
+        object_owner(response_in_json, 'List', 'lists', @key_user)
+      end
+      it 'lists owned/returned by key user are 10' do
+        get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
+        lists_all = List.all
+        expect(lists_all.length).to eq(25)
+        expect(response_in_json['lists'].length).to eq(10)
+      end
+      it 'permitted lists include id' do
+        get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
+        check_each_object(response_in_json, 'lists', 'id', true)
+      end
+      it 'permitted lists include name' do
+        get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
+        check_each_object(response_in_json, 'lists', 'name', true)
+      end
+      it 'permitted lists include user_id' do
+        get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
+        check_each_object(response_in_json, 'lists', 'user_id', true)
+      end
+      it 'permitted lists include permissions' do
+        get "/api/lists", nil, 'HTTP_AUTHORIZATION' =>  key
+        check_each_object(response_in_json, 'lists', 'permissions', true)
+      end
     end
-    it 'responds with unauthorized to unauthenticated user' do
-      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => nil
-      expect(response).to have_http_status(:unauthorized)
+    context 'user without key' do
+      it 'responds with unauthorized' do
+        get "/api/lists", nil, 'HTTP_AUTHORIZATION' => nil
+        expect(response).to have_http_status(:unauthorized)
+      end
     end
-    context 'expired key' do
-      it_behaves_like 'expired key', { :index => :get }, "/api/lists", List, nil, :api_key
-    end
-#     it 'responds with unauthorized to expired key' do
-#       api_key.expires_at = 1.day.ago
-#       api_key.save
-#       key = user_key(api_key.access_token)
-#       get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
-#       expect(response).to have_http_status(:unauthorized)
-#     end
-    it 'lists owned by key user are returned' do
-      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
-      object_owner(response_in_json, 'List', 'lists', @key_user)
-    end
-    it 'lists owned by key user are 10' do
-      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
-      expect(response_in_json['lists'].length).to eq(10)
-    end
-    it 'lists created in total are 25' do
-      lists_all = List.all
-      expect(lists_all.length).to eq(25)
-    end
-    it 'permitted lists include id' do
-      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
-      check_each_object(response_in_json, 'lists', 'id', true)
-    end
-    it 'permitted lists include name' do
-      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
-      check_each_object(response_in_json, 'lists', 'name', true)
-    end
-    it 'permitted lists include user_id' do
-      get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
-      check_each_object(response_in_json, 'lists', 'user_id', true)
-    end
-    it 'permitted lists include permissions' do
-      get "/api/lists", nil, 'HTTP_AUTHORIZATION' =>  key
-      check_each_object(response_in_json, 'lists', 'permissions', true)
+    context 'user with expired key' do
+      it_behaves_like 'expired key', 'list', { :index => :get }, nil
     end
   end
   describe '#create request' do
+    context 'user with valid key' do
+      it_behaves_like 'authenticated user', 'list', { :create => :post }, { list: { name: 'my new list' } }
+    end
     it 'responds with a list object serialized in JSON' do
       post "/api/users/#{user.id}/lists", { list: { name: 'my new list' } }, 'HTTP_AUTHORIZATION' => key
       expect(response_in_json['list']['name']).to eq('my new list')
@@ -98,23 +93,13 @@ RSpec.describe Api::ListsController, type: :request do
       post "/api/users/#{user.id}/lists", { list: { name: 'my list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
       expect(response_in_json['list']['permissions']).to eq('private')
     end
-    it 'responds with sucess to authenticated user' do
-      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-      expect(response).to have_http_status(:success)
-    end
     it 'responds with unauthorized to unauthenticated user' do
       post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => nil
       expect(response).to have_http_status(:unauthorized)
     end
     # it 'responds with unauthorized to expired key' do
-    context 'create with expired key' do
-      it_behaves_like 'expired key', {:create => :post}, "/api/users/1/lists", List, { list: { name: 'my list' } }, :api_key
-#       api_key.expires_at = 1.day.ago
-#       api_key.save
-#       key = user_key(api_key.access_token)
-#       post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-#       expect(response).to have_http_status(:unauthorized)
-    # end
+    context 'with expired key' do
+      it_behaves_like 'expired key', 'list', {:create => :post}, { list: { name: 'my list' } }
     end
     it 'failure responds with appropriate error message for absent name' do
       post "/api/users/#{user.id}/lists", { list: { name: ' ' } }, 'HTTP_AUTHORIZATION' => key
@@ -136,6 +121,9 @@ RSpec.describe Api::ListsController, type: :request do
   describe '#update request' do
     before do
       @list_update = create(:list, user_id: user.id)
+    end
+    context 'user with valid key' do
+      it_behaves_like 'authenticated user', 'list', { :update => :patch }, { list: { name: 'my updated list', permissions: 'private' } }
     end
     it 'responds with status 200' do
       patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
@@ -164,15 +152,8 @@ RSpec.describe Api::ListsController, type: :request do
       expect(response).to have_http_status(:unauthorized)
     end
     context 'with expired key' do
-      it_behaves_like 'expired key', { :update => :patch }, "/api/users/2/lists/2", List, { list: { name: 'my new list', permissions: 'private' } }, :api_key
+      it_behaves_like 'expired key', 'list', { :update => :patch }, { list: { name: 'my updated list', permissions: 'private' } }
     end
-#     it 'responds with unauthorized to expired key' do
-#       api_key.expires_at = 1.day.ago
-#       api_key.save
-#       key = user_key(api_key.access_token)
-#       patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-#       expect(response).to have_http_status(:unauthorized)
-#     end
     it 'responds with unauthorized when key user is not the list user' do
       api_key_other = create(:api_key)
       key = user_key(api_key_other.access_token)
@@ -191,6 +172,9 @@ RSpec.describe Api::ListsController, type: :request do
       @list_destroy = create(:list, user_id: user.id)
       @items = create_list(:item, 5, list_id: @list_destroy.id)
     end
+    context 'user with valid key' do
+      it_behaves_like 'authenticated user', 'list', { :destroy => :delete }, nil
+    end
     it 'responds with no_content' do
       delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
       expect(response).to have_http_status(:no_content)
@@ -203,12 +187,8 @@ RSpec.describe Api::ListsController, type: :request do
       delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => nil
       expect(response.status).to eq(401)
     end
-    it 'responds with unauthorized to expired key' do
-      api_key.expires_at = 1.day.ago
-      api_key.save
-      key = user_key(api_key.access_token)
-      delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
-      expect(response).to have_http_status(:unauthorized)
+    context 'with expired key' do
+      it_behaves_like 'expired key', 'list', { :destroy => :delete }, nil
     end
     it 'raises exception status not_found for missing list' do
       expect { delete "/api/users/#{user.id}/lists/100", nil, 'HTTP_AUTHORIZATION' => key }.to raise_exception(ActiveRecord::RecordNotFound)

@@ -2,7 +2,7 @@ required simplecov
 Run options: include {:locations=>{"./spec/requests/lists.rb"=>[166]}}
 .
 
-Finished in 0.08565 seconds (files took 2.35 seconds to load)
+Finished in 0.08445 seconds (files took 2.38 seconds to load)
 1 example, 0 failures
 
 Coverage report generated for RSpec to /home/action/code/openTodo/coverage. 75 / 101 LOC (74.26%) covered.
