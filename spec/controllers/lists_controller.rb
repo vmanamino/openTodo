@@ -7,6 +7,7 @@ RSpec.describe Api::ListsController, type: :controller do
   let(:api_key) { create(:api_key, user: user) }
   describe '#index' do
     before do
+      @user = create(:user)
       @lists = create_list(:list, 5)
       @lists_user = create_list(:list, 5, user: api_key.user) # total 10 lists, only 5 in response
     end
@@ -14,7 +15,7 @@ RSpec.describe Api::ListsController, type: :controller do
       before do
         http_key_auth
       end
-      it_behaves_like 'action with active key', 'list', { :index => :get }, ''
+      it_behaves_like 'action with active key', 'list', { :index => :get }, @user
     end
     it 'responds with success to authenticated user' do
       http_key_auth
@@ -71,6 +72,12 @@ RSpec.describe Api::ListsController, type: :controller do
     end
   end
   describe '#create' do
+    context 'active valid key' do
+      before do
+        http_key_auth
+      end
+      it_behaves_like 'action with active key', 'list', { :create => :post }, list: { name: 'my list', permissions: 'viewable' }
+    end
     it 'denied to unauthenticated user' do
       post :create, user_id: user.id, list: { name: 'my list', permissions: 'viewable' }
       expect(response).to have_http_status(:unauthorized)

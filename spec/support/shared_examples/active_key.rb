@@ -18,8 +18,8 @@ shared_examples 'active key' do |object, verb_pair, parameters|
   end
 end
 
-shared_examples 'action with active key' do |object, verb_pair, post_data=nil|
-  let(:user) { create(:user) }
+shared_examples 'action with active key' do |object, verb_pair, post_data=nil, user|
+  # let(:user) { create(:user) }
   let(:api_key) { create(:api_key, user: user) }
   let(:list) { create(:list, user: user) }
   it 'responds with success', type: :controller do
@@ -28,8 +28,10 @@ shared_examples 'action with active key' do |object, verb_pair, post_data=nil|
       case object
         when 'list'
           case action
-            when 'index'
+            when :index
               send(verb, action)
+            when :create
+              send(verb, action, user, post_data)
           end
       end
       # binding.pry

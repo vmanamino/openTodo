@@ -69,7 +69,7 @@ RSpec.describe Api::ListsController, type: :request do
       end
       it 'serialized list includes name' do
         post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-        check_object(response_in_json, 'list', 'id', true)
+        check_object(response_in_json, 'list', 'name', true)
       end
       it 'serialized list includes user_id' do
         post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
