@@ -4,16 +4,13 @@ module PathHelper
     case object
       when 'list'
         case action
-          when :update, :destroy
-            #path = build_list_path(:exists, user, list)
-            path = "/api/users/#{user.id}/lists/#{list.id}"
-          when :create
-            path = "/api/users/#{user.id}/lists"
-            # path = build_list_path(:anew, user)
           when :index
             lists = create_list(:list, 5, user: user)
-            # path = build_list_path(:collects, user)
             path = "/api/lists"
+          when :create
+            path = "/api/users/#{user.id}/lists"
+          when :update, :destroy
+            path = "/api/users/#{user.id}/lists/#{list.id}"
         end
       when 'item'
         case action

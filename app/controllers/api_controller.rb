@@ -45,11 +45,7 @@ class ApiController < ApplicationController
   def authorization
     key_owner = get_key_user
     controller = params[:controller]
-    # name = Object.const_get(controller)
     controller_name = /api\/([a-z]+)/.match(controller)[1]
-    # model_name = controller_name.singularize
-    # model = model_name.capitalize
-    # my_Model = Object.const_get(model)
     if controller_name == 'items'
       list = List.find(params[:list_id])
       unless list.user.id == key_owner.id

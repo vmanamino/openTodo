@@ -17,8 +17,8 @@ RSpec.describe Api::ListsController, type: :request do
       @lists_user = create_list(:list, 5, user: @key_user) # 5 lists
       @lists_user_private = create_list(:list, 5, user: @key_user, permissions: 'private') # + 5 = 10 lists WILL appear in request responses
     end
-    context 'user with valid key' do
-      it_behaves_like 'authenticated user', 'list', { :index => :get }, nil
+    context 'user with active key' do
+      it_behaves_like 'active key', 'list', { :index => :get }, nil
       it 'lists owned by key user returned' do
         get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
         object_owner(response_in_json, 'List', 'lists', @key_user)
@@ -57,114 +57,95 @@ RSpec.describe Api::ListsController, type: :request do
     end
   end
   describe '#create request' do
-    context 'user with valid key' do
-      it_behaves_like 'authenticated user', 'list', { :create => :post }, { list: { name: 'my new list' } }
+    context 'user with active key' do
+      it_behaves_like 'active key', 'list', { :create => :post }, { list: { name: 'my new list' } }
+      it 'responds with a list object serialized in JSON' do
+        post "/api/users/#{user.id}/lists", { list: { name: 'my new list' } }, 'HTTP_AUTHORIZATION' => key
+        expect(response_in_json['list']['name']).to eq('my new list')
+      end
+      it 'serialized list includes id' do
+        post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
+        check_object(response_in_json, 'list', 'id', true)
+      end
+      it 'serialized list includes name' do
+        post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
+        check_object(response_in_json, 'list', 'id', true)
+      end
+      it 'serialized list includes user_id' do
+        post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
+        check_object(response_in_json, 'list', 'user_id', true)
+      end
+      it 'list user is key user' do
+        post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
+        key_user = api_key.user
+        expect(response_in_json['list']['user_id']).to eq(key_user.id)
+      end
+      it 'params user is list user' do
+        post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
+        expect(response_in_json['list']['user_id']).to eq(user.id)
+      end
+      it 'permissions automatically set to viewable' do
+        post "/api/users/#{user.id}/lists", { list: {  name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
+        expect(response_in_json['list']['permissions']).to eq('viewable')
+      end
+      it 'enter private permissions' do
+        post "/api/users/#{user.id}/lists", { list: { name: 'my list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+        expect(response_in_json['list']['permissions']).to eq('private')
+      end
+      it 'failure responds with appropriate error message for absent name' do
+        post "/api/users/#{user.id}/lists", { list: { name: ' ' } }, 'HTTP_AUTHORIZATION' => key
+        expect(response_in_json['errors'][0]).to eq('Name can\'t be blank')
+      end
     end
-    it 'responds with a list object serialized in JSON' do
-      post "/api/users/#{user.id}/lists", { list: { name: 'my new list' } }, 'HTTP_AUTHORIZATION' => key
-      expect(response_in_json['list']['name']).to eq('my new list')
+    context 'user without key' do
+      it 'responds with unauthorized' do
+        post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => nil
+        expect(response).to have_http_status(:unauthorized)
+      end
     end
-    it 'serialized list includes id' do
-      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-      check_object(response_in_json, 'list', 'id', true)
-    end
-    it 'serialized list includes name' do
-      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-      check_object(response_in_json, 'list', 'id', true)
-    end
-    it 'serialized list includes user_id' do
-      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-      check_object(response_in_json, 'list', 'user_id', true)
-    end
-    it 'list user is key user' do
-      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-      key_user = api_key.user
-      expect(response_in_json['list']['user_id']).to eq(key_user.id)
-    end
-    it 'params user is list user' do
-      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-      expect(response_in_json['list']['user_id']).to eq(user.id)
-    end
-    it 'permissions automatically set to viewable' do
-      post "/api/users/#{user.id}/lists", { list: {  name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-      expect(response_in_json['list']['permissions']).to eq('viewable')
-    end
-    it 'enter private permissions' do
-      post "/api/users/#{user.id}/lists", { list: { name: 'my list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-      expect(response_in_json['list']['permissions']).to eq('private')
-    end
-    it 'responds with unauthorized to unauthenticated user' do
-      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => nil
-      expect(response).to have_http_status(:unauthorized)
-    end
-    # it 'responds with unauthorized to expired key' do
     context 'with expired key' do
       it_behaves_like 'expired key', 'list', {:create => :post}, { list: { name: 'my list' } }
     end
-    it 'failure responds with appropriate error message for absent name' do
-      post "/api/users/#{user.id}/lists", { list: { name: ' ' } }, 'HTTP_AUTHORIZATION' => key
-      expect(response_in_json['errors'][0]).to eq('Name can\'t be blank')
-    end
-    it 'responds with unauthorized when key user is not the params user' do
-      api_key_other = create(:api_key)
-      key = user_key(api_key_other.access_token)
-      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-      expect(response).to have_http_status(:unauthorized)
-    end
-    it 'responds with appropriate message when key user is not params user' do
-      api_key_other = create(:api_key)
-      key = user_key(api_key_other.access_token)
-      post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-      expect(response_in_json['message']).to eq('you are not the owner of the requested list')
+    context 'user not authorized' do
+      it_behaves_like 'wrong key', 'list', { :create => :post }, { list: { name: 'my list' } }
+      it_behaves_like 'wrong key with message', 'list', { :create => :post }, { list: { name: 'my list' } }, 'you are not the owner of the requested list'
     end
   end
   describe '#update request' do
     before do
       @list_update = create(:list, user_id: user.id)
     end
-    context 'user with valid key' do
-      it_behaves_like 'authenticated user', 'list', { :update => :patch }, { list: { name: 'my updated list', permissions: 'private' } }
+    context 'user with active key' do
+      it_behaves_like 'active key', 'list', { :update => :patch }, { list: { name: 'my updated list', permissions: 'private' } }
+      it 'saves attributes' do
+        patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+        updated_list = List.find(@list_update.id)
+        expect(updated_list.name).to eq('my new list')
+        expect(updated_list.permissions).to eq('private')
+      end
+      context 'invalid permissions' do
+        it 'raises exception status' do
+          patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'update not granted' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+          expect(response).to have_http_status(422)
+        end
+        it 'appropriate error message' do
+          patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'update not granted' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+          expect(response_in_json['errors'][0]).to eq('Permissions is not included in the list')
+        end
+      end
     end
-    it 'responds with status 200' do
-      patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-      expect(response).to have_http_status(200)
-    end
-    it 'saves attributes' do
-      patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-      updated_list = List.find(@list_update.id)
-      expect(updated_list.name).to eq('my new list')
-      expect(updated_list.permissions).to eq('private')
-    end
-    it 'raises exception status' do
-      patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'update not granted' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-      expect(response).to have_http_status(422)
-    end
-    it 'appropriate error message' do
-      patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'update not granted' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-      expect(response_in_json['errors'][0]).to eq('Permissions is not included in the list')
-    end
-    it 'responds with success to authenticated user' do
-      patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-      expect(response).to have_http_status(:success)
-    end
-    it 'responds with unauthorized to unauthenticated user' do
-      patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => nil # rubocop:disable Metrics/LineLength
-      expect(response).to have_http_status(:unauthorized)
+    context 'user without key' do
+      it 'responds with unauthorized' do
+        patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => nil # rubocop:disable Metrics/LineLength
+        expect(response).to have_http_status(:unauthorized)
+      end
     end
     context 'with expired key' do
       it_behaves_like 'expired key', 'list', { :update => :patch }, { list: { name: 'my updated list', permissions: 'private' } }
     end
-    it 'responds with unauthorized when key user is not the list user' do
-      api_key_other = create(:api_key)
-      key = user_key(api_key_other.access_token)
-      patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-      expect(response).to have_http_status(:unauthorized)
-    end
-    it 'responds with the appropriate message when key user is not the list user' do
-      api_key_other = create(:api_key)
-      key = user_key(api_key_other.access_token)
-      patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list' } }, 'HTTP_AUTHORIZATION' => key
-      expect(response_in_json['message']).to eq('you are not the owner of the requested list')
+    context 'user not authorized' do
+      it_behaves_like 'wrong key', 'list', { :update => :patch }, { list: { name: 'my updated list', permissions: 'private' } }
+      it_behaves_like 'wrong key with message', 'list', { :update => :patch }, { list: { name: 'my updated list', permissions: 'private' } }, 'you are not the owner of the requested list' # rubocop:disable Metrics/LineLength
     end
   end
   describe '#destroy request' do
@@ -172,45 +153,39 @@ RSpec.describe Api::ListsController, type: :request do
       @list_destroy = create(:list, user_id: user.id)
       @items = create_list(:item, 5, list_id: @list_destroy.id)
     end
-    context 'user with valid key' do
-      it_behaves_like 'authenticated user', 'list', { :destroy => :delete }, nil
+    context 'user with active key' do
+      it_behaves_like 'active key', 'list', { :destroy => :delete }, nil
+      it 'responds with no_content' do
+        delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
+        expect(response).to have_http_status(:no_content)
+      end
+      it 'responds with code 204' do
+        delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
+        expect(response.status).to eq(204)
+      end
+      it 'destroys item dependents' do
+        items = Item.all
+        expect(items.length).to eq(5)
+        delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
+        items.reload
+        expect(items.length).to eq(0)
+      end
+      it 'raises exception status not_found for missing list' do
+        expect { delete "/api/users/#{user.id}/lists/100", nil, 'HTTP_AUTHORIZATION' => key }.to raise_exception(ActiveRecord::RecordNotFound)
+      end
     end
-    it 'responds with no_content' do
-      delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
-      expect(response).to have_http_status(:no_content)
-    end
-    it 'responds with code 204' do
-      delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
-      expect(response.status).to eq(204)
-    end
-    it 'responds with status code 401 to unauthenticated user' do
-      delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => nil
-      expect(response.status).to eq(401)
+    context 'user without key' do
+      it 'responds with status code 401 to unauthenticated user' do
+        delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => nil
+        expect(response.status).to eq(401)
+      end
     end
     context 'with expired key' do
       it_behaves_like 'expired key', 'list', { :destroy => :delete }, nil
     end
-    it 'raises exception status not_found for missing list' do
-      expect { delete "/api/users/#{user.id}/lists/100", nil, 'HTTP_AUTHORIZATION' => key }.to raise_exception(ActiveRecord::RecordNotFound)
-    end
-    it 'responds with unauthorized when key user is not list user' do
-      key_other = create(:api_key)
-      key = user_key(key_other.access_token)
-      delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
-      expect(response).to have_http_status(:unauthorized)
-    end
-    it 'responds with appropriate message when key user is not list user' do
-      key_other = create(:api_key)
-      key = user_key(key_other.access_token)
-      delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
-      expect(response_in_json['message']).to eq('you are not the owner of the requested list')
-    end
-    it 'destroys item dependents' do
-      items = Item.all
-      expect(items.length).to eq(5)
-      delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
-      items.reload
-      expect(items.length).to eq(0)
+    context 'user not authorized' do
+      it_behaves_like 'wrong key', 'list', { :destroy => :delete }, nil
+      it_behaves_like 'wrong key with message', 'list', { :destroy => :delete }, nil, 'you are not the owner of the requested list'
     end
   end
 end

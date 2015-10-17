@@ -10,6 +10,12 @@ RSpec.describe Api::ListsController, type: :controller do
       @lists = create_list(:list, 5)
       @lists_user = create_list(:list, 5, user: api_key.user) # total 10 lists, only 5 in response
     end
+    context 'active valid key' do
+      before do
+        http_key_auth
+      end
+      it_behaves_like 'action with active key', 'list', { :index => :get }, ''
+    end
     it 'responds with success to authenticated user' do
       http_key_auth
       get :index
