@@ -21,60 +21,54 @@ shared_examples 'expired key' do |object, verb_pair, parameters|
 end
 
 shared_examples 'index with expired key' do
+  before do
+    expire_key(api_key)
+  end
   it 'responds with unauthorized', type: :controller do
-    http_key_auth
     get :index
     expect(response).to have_http_status(:unauthorized)
   end
 end
 
 shared_examples 'create with expired key' do |object, parameters|
-  let(:user) { create(:user) }
-  let(:api_key) { create(:api_key, user: user) }
   before do
     expire_key(api_key)
   end
   it 'responds with unauthorized', type: :controller do
-    http_key_auth
     case object
       when 'list'
         post :create, user_id: user.id, list: parameters
+      when 'item'
+        post :create, list_id: list.id, item: parameters
     end
     expect(response).to have_http_status(:unauthorized)
   end
 end
 
 shared_examples 'update with expired key' do |object, parameters|
-  let(:user) { create(:user) }
-  let(:api_key) { create(:api_key, user: user) }
-  let(:list) { create(:list, user: user) }
-  let(:item) { create(:item, list: list) }
   before do
     expire_key(api_key)
   end
   it 'responds with unauthorized', type: :controller do
-    http_key_auth
     case object
       when 'list'
-        patch :update, user_id: user.id, id: list.id, list: parameters
+        patch :update, user_id: user.id, id: @list_update.id, list: parameters
+      when 'item'
+        patch :update, list_id: list.id, id: @item_update.id, item: parameters
     end
+    # binding.pry
     expect(response).to have_http_status(:unauthorized)
   end
 end
 
 shared_examples 'destroy with expired key' do |object|
-  let(:user) { create(:user) }
-  let(:api_key) { create(:api_key, user: user) }
-  let(:list) { create(:list, user: user) }
-  let(:item) { create(:item, list: list) }
   before do
     expire_key(api_key)
   end
   it 'responds with unauthorized', type: :controller do
-    http_key_auth
     case object
       when 'list'
-        delete :destroy, user_id: user.id, id: list.id
+        delete :destroy, user_id: user.id, id: @list_destroy.id
     end
     expect(response).to have_http_status(:unauthorized)
   end

@@ -19,7 +19,7 @@ shared_examples 'active key' do |object, verb_pair, parameters|
   end
 end
 
-shared_examples 'index with active key' do
+shared_examples 'index with active valid key' do
   it 'responds with success', type: :controller do
     get :index
     # binding.pry
@@ -28,13 +28,12 @@ shared_examples 'index with active key' do
 end
 
 shared_examples 'create with active valid key' do |object, parameters|
-  let(:user) { create(:user) }
-  let(:api_key) { create(:api_key, user: user) }
   it 'responds with success' do
     case object
       when 'list'
-        http_key_auth
         post :create, user_id: user.id, list: parameters
+      when 'item'
+        post :create, list_id: list.id, item: parameters
     end
     # binding.pry
     expect(response).to have_http_status(:success)
@@ -42,30 +41,22 @@ shared_examples 'create with active valid key' do |object, parameters|
 end
 
 shared_examples 'update with active valid key' do |object, parameters|
-  let(:user) { create(:user) }
-  let(:api_key) { create(:api_key, user: user) }
-  let(:list) { create(:list, user: user) }
-  let(:item) { create(:item, list: list) }
   it 'responds with success' do
-    http_key_auth
     case object
       when 'list'
-        patch :update, user_id: user.id, id: list.id, list: parameters
+        patch :update, user_id: user.id, id: @list_update.id, list: parameters
+      when 'item'
+        patch :update, list_id: list.id, id: @item_update.id, item: parameters
     end
     expect(response).to have_http_status(:success)
   end
 end
 
 shared_examples 'destroy with active valid key' do |object|
-  let(:user) { create(:user) }
-  let(:api_key) { create(:api_key, user: user) }
-  let(:list) { create(:list, user: user) }
-  let(:item) { create(:item, list: list) }
-  it 'responds with no content and 202' do
-    http_key_auth
+  it 'responds with no content and 204' do
     case object
       when 'list'
-        delete :destroy, user_id: user.id, id: list.id
+        delete :destroy, user_id: user.id, id: @list_destroy.id
     end
     expect(response).to have_http_status(:no_content)
     expect(response.status).to eq(204)

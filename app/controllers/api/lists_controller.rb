@@ -1,6 +1,7 @@
 class Api::ListsController < ApiController # rubocop:disable Style/ClassAndModuleChildren
   before_action :authenticated?, unless: :keyed_open
   before_action :authorization, only: [:create, :update, :destroy]
+
   def index
     user = get_key_user
     lists = List.visible_to(user)
