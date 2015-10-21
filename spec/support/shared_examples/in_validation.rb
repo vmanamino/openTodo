@@ -9,6 +9,7 @@ shared_examples 'invalid parameter returns 422' do |object, verb_pair, parameter
       path = build_path(object, action)
       send(request, path, parameters, 'HTTP_AUTHORIZATION' => key)
     end
+    # binding.pry
     expect(response.status).to eq(422)
   end
 end
