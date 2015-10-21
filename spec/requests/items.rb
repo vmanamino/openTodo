@@ -105,7 +105,7 @@ RSpec.describe Api::ItemsController, type: :request do
         context 'empty attributes' do
           context 'status code' do
             it_behaves_like 'invalid parameter returns 422', 'item', { :create => :post }, { item: { name: '', done: false } }
-            # it_behaves_like 'invalid parameter returns 422', 'item', { :create => :post }, { item: { name: 'my finished item', done: nil } }
+            # it_behaves_like 'invalid parameter returns 422', 'item', { :create => :post }, { item: { name: 'my finished item', done: '' } }
           end
           context 'json message' do
             it_behaves_like 'invalid parameter returns error in json', 'item', { :create => :post }, { item: { name: '', done: false } }, 'Name can\'t be blank'
