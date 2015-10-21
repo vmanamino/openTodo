@@ -51,10 +51,7 @@ RSpec.describe Api::ItemsController, type: :controller do
       end
     end
     context 'user without key' do
-      it 'responds with unauthorized to unauthenticated user' do
-        get :index
-        expect(response).to have_http_status(:unauthorized)
-      end
+      it_behaves_like 'index unauthorized'
     end
     context 'user with expired key' do
       before do
@@ -118,10 +115,7 @@ RSpec.describe Api::ItemsController, type: :controller do
       end
     end
     context 'user without key' do
-      it 'denied to unauthenticated user' do
-        post :create, list_id: list.id, item: { name: 'get it done' }
-        expect(response).to have_http_status(:unauthorized)
-      end
+      it_behaves_like 'create unauthorized', 'item', { name: 'get it done' }
     end
     context 'user with expired key' do
       before do
@@ -168,10 +162,7 @@ RSpec.describe Api::ItemsController, type: :controller do
       end
     end
     context 'user without key' do
-      it 'denies unauthenticated user' do
-        patch :update, list_id: list.id, id: @item_update.id, item: { name: 'my finished item', done: true }
-        expect(response.status).to eq(401)
-      end
+      it_behaves_like 'update unauthorized', 'item', { name: 'my finished item', done: true }
     end
     context 'user with expired key' do
       before do

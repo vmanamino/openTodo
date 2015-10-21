@@ -2,6 +2,7 @@ require 'rails_helper'
 
 include JsonHelper
 include AuthHelper
+include ExpiredKey
 
 RSpec.describe Api::ListsController, type: :request do
   let(:controller) { Api::ListsController.new }
@@ -18,7 +19,7 @@ RSpec.describe Api::ListsController, type: :request do
       @lists_user_private = create_list(:list, 5, user: @key_user, permissions: 'private') # + 5 = 10 lists WILL appear in request responses
     end
     context 'user with active key' do
-      it_behaves_like 'active key', 'list', { :index => :get }, nil
+      it_behaves_like 'active valid key', 'list', { :index => :get }, nil
       it 'lists owned by key user returned' do
         get "/api/lists", nil, 'HTTP_AUTHORIZATION' => key
         object_owner(response_in_json, 'List', 'lists', @key_user)
@@ -47,10 +48,7 @@ RSpec.describe Api::ListsController, type: :request do
       end
     end
     context 'user without key' do
-      it 'responds with unauthorized' do
-        get "/api/lists", nil, 'HTTP_AUTHORIZATION' => nil
-        expect(response).to have_http_status(:unauthorized)
-      end
+      it_behaves_like 'unauthenticated user', 'list', { :index => :get }, nil
     end
     context 'user with expired key' do
       it_behaves_like 'expired key', 'list', { :index => :get }, nil
@@ -58,7 +56,7 @@ RSpec.describe Api::ListsController, type: :request do
   end
   describe '#create request' do
     context 'user with active key' do
-      it_behaves_like 'active key', 'list', { :create => :post }, { list: { name: 'my new list' } }
+      it_behaves_like 'active valid key', 'list', { :create => :post }, { list: { name: 'my new list' } }
       it 'responds with a list object serialized in JSON' do
         post "/api/users/#{user.id}/lists", { list: { name: 'my new list' } }, 'HTTP_AUTHORIZATION' => key
         expect(response_in_json['list']['name']).to eq('my new list')
@@ -96,12 +94,29 @@ RSpec.describe Api::ListsController, type: :request do
         post "/api/users/#{user.id}/lists", { list: { name: ' ' } }, 'HTTP_AUTHORIZATION' => key
         expect(response_in_json['errors'][0]).to eq('Name can\'t be blank')
       end
+      context 'invalid attributes' do
+        context 'empty attributes' do
+          context 'status code' do
+            it_behaves_like 'invalid parameter returns 422', 'list', { :create => :post }, { list: { name: '', permissions: 'viewable'} }
+            it_behaves_like 'invalid parameter returns 422', 'list', { :create => :post }, { list: { name: 'my new list', permissions: '' } }
+          end
+          context 'json message' do
+            it_behaves_like 'invalid parameter returns error in json', 'list', { :create => :post }, { list: { name: '', permissions: 'viewable' } }, 'Name can\'t be blank'
+            it_behaves_like 'invalid parameter returns error in json', 'list', { :create => :post }, { list: { name: 'my new list', permissions: '' } }, 'Permissions is not included in the list'
+          end
+        end
+        context 'incorrect attributes' do
+          context 'status code' do
+            it_behaves_like 'invalid parameter returns 422', 'list', { :create => :post }, { list: { name: 'my new list', permissions: 'not granted' } }
+          end
+          context 'json message' do
+            it_behaves_like 'invalid parameter returns error in json', 'list', { :create => :post }, { list: { name: 'my new list', permissions: 'not granted' } }, 'Permissions is not included in the list'
+          end
+        end
+      end
     end
     context 'user without key' do
-      it 'responds with unauthorized' do
-        post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => nil
-        expect(response).to have_http_status(:unauthorized)
-      end
+      it_behaves_like 'unauthenticated user', 'list', { :create => :post }, { list: { name: 'my list' } }
     end
     context 'with expired key' do
       it_behaves_like 'expired key', 'list', {:create => :post}, { list: { name: 'my list' } }
@@ -116,29 +131,36 @@ RSpec.describe Api::ListsController, type: :request do
       @list_update = create(:list, user_id: user.id)
     end
     context 'user with active key' do
-      it_behaves_like 'active key', 'list', { :update => :patch }, { list: { name: 'my updated list', permissions: 'private' } }
+      it_behaves_like 'active valid key', 'list', { :update => :patch }, { list: { name: 'my updated list', permissions: 'private' } }
       it 'saves attributes' do
         patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
         updated_list = List.find(@list_update.id)
         expect(updated_list.name).to eq('my new list')
         expect(updated_list.permissions).to eq('private')
       end
-      context 'invalid permissions' do
-        it 'raises exception status' do
-          patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'update not granted' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-          expect(response).to have_http_status(422)
+      context 'invalid attributes' do
+        context 'empty attributes' do
+          context 'status code' do
+            it_behaves_like 'invalid parameter returns 422', 'list', { :update => :patch }, { list: { name: '', permissions: 'viewable'} }
+            it_behaves_like 'invalid parameter returns 422', 'list', { :update => :patch }, { list: { name: 'my new list', permissions: '' } }
+          end
+          context 'json message' do
+            it_behaves_like 'invalid parameter returns error in json', 'list', { :update => :patch }, { list: { name: '', permissions: 'viewable' } }, 'Name can\'t be blank'
+            it_behaves_like 'invalid parameter returns error in json', 'list', { :update => :patch }, { list: { name: 'my new list', permissions: '' } }, 'Permissions is not included in the list'
+          end
         end
-        it 'appropriate error message' do
-          patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'update not granted' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-          expect(response_in_json['errors'][0]).to eq('Permissions is not included in the list')
+        context 'incorrect attributes' do
+          context 'status code' do
+            it_behaves_like 'invalid parameter returns 422', 'list', { :update => :patch }, { list: { name: 'my new list', permissions: 'not granted' } }
+          end
+          context 'json message' do
+            it_behaves_like 'invalid parameter returns error in json', 'list', { :update => :patch }, { list: { name: 'my new list', permissions: 'not granted' } }, 'Permissions is not included in the list'
+          end
         end
       end
     end
     context 'user without key' do
-      it 'responds with unauthorized' do
-        patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => nil # rubocop:disable Metrics/LineLength
-        expect(response).to have_http_status(:unauthorized)
-      end
+      it_behaves_like 'unauthenticated user', 'list', { :update => :patch }, { list: { name: 'my new list', permissions: 'private' } }
     end
     context 'with expired key' do
       it_behaves_like 'expired key', 'list', { :update => :patch }, { list: { name: 'my updated list', permissions: 'private' } }
@@ -154,7 +176,7 @@ RSpec.describe Api::ListsController, type: :request do
       @items = create_list(:item, 5, list_id: @list_destroy.id)
     end
     context 'user with active key' do
-      it_behaves_like 'active key', 'list', { :destroy => :delete }, nil
+      it_behaves_like 'active valid key', 'list', { :destroy => :delete }, nil
       it 'responds with no_content' do
         delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
         expect(response).to have_http_status(:no_content)
@@ -175,10 +197,7 @@ RSpec.describe Api::ListsController, type: :request do
       end
     end
     context 'user without key' do
-      it 'responds with status code 401 to unauthenticated user' do
-        delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => nil
-        expect(response.status).to eq(401)
-      end
+      it_behaves_like 'unauthenticated user', 'list', { :destroy => :delete }, nil
     end
     context 'with expired key' do
       it_behaves_like 'expired key', 'list', { :destroy => :delete }, nil

@@ -1,6 +1,7 @@
 require 'rails_helper'
 include AuthHelper
 include JsonHelper
+include ExpiredKey
 
 RSpec.describe Api::ItemsController, type: :request do
   let(:user) { create(:user) }
@@ -20,7 +21,7 @@ RSpec.describe Api::ItemsController, type: :request do
       @items_list_two_other = create_list(:item, 5, list: @list_two_other) # total 20 items in db
     end
     context 'user with active key' do
-      it_behaves_like 'active key', 'item', { :index => :get }, nil
+      it_behaves_like 'active valid key', 'item', { :index => :get }, nil
       it 'responds with all items in serialized json' do
         get "/api/items", nil, 'HTTP_AUTHORIZATION' => key
         expect(response_in_json['items'].length).to eq(10)
@@ -53,10 +54,7 @@ RSpec.describe Api::ItemsController, type: :request do
       end
     end
     context 'user without key' do
-      it 'responds with unauthorized to unauthenticated user' do
-        get "/api/items", nil, 'HTTP_AUTHORIZATION' => nil
-        expect(response).to have_http_status(:unauthorized)
-      end
+      it_behaves_like 'unauthenticated user', 'item', { :index => :get }, nil
     end
     context 'with expired key' do
       it_behaves_like 'expired key', 'item', { :index => :get }, nil
@@ -64,7 +62,7 @@ RSpec.describe Api::ItemsController, type: :request do
   end
   describe '#create request' do
     context 'user with active key' do
-      it_behaves_like 'active key', 'item', { :create => :post }, { item: { name: 'my item' } }
+      it_behaves_like 'active valid key', 'item', { :create => :post }, { item: { name: 'my item' } }
       it 'responds with object serialized in JSON' do
         post "/api/lists/#{list.id}/items", { item: { name: 'my item' } }, 'HTTP_AUTHORIZATION' => key
         expect(response_in_json['item']['name']).to eq('my item')
@@ -103,16 +101,31 @@ RSpec.describe Api::ItemsController, type: :request do
         expect(item.length).to eq(1)
         expect(item[0][:id]).to_not be nil
       end
-      it 'failure responds with appropriate message for absent name' do
-        post "/api/lists/#{list.id}/items", { item: { name: ' ' } }, 'HTTP_AUTHORIZATION' => key
-        expect(response_in_json['errors'][0]).to eq('Name can\'t be blank')
+      context 'invalid attributes' do
+        context 'empty attributes' do
+          context 'status code' do
+            it_behaves_like 'invalid parameter returns 422', 'item', { :create => :post }, { item: { name: '', done: false } }
+            # it_behaves_like 'invalid parameter returns 422', 'item', { :create => :post }, { item: { name: 'my finished item', done: nil } }
+          end
+          context 'json message' do
+            it_behaves_like 'invalid parameter returns error in json', 'item', { :create => :post }, { item: { name: '', done: false } }, 'Name can\'t be blank'
+            # it_behaves_like 'invalid parameter returns error in json', 'item', { :create => :post }, { item: { name: 'my finished item', done: nil } }, 'Done is not included in the list'
+          end
+        end
+        context 'incorrect attributes' do
+          context 'status code' do
+            # it_behaves_like 'invalid parameter returns error in json', 'item', { :create => :post }, { item: { name: 1, done: false } }
+            # it_behaves_like 'invalid parameter returns 422', 'item', { :create => :post }, { item: { name: 'my finished item', done: 'correct' } }
+          end
+          context 'json message' do
+            # it_behaves_like 'invalid parameter returns error in json', 'item', { :create => :post }, { item: { name: 1, done: false } }, 'Name can\'t be blank'
+            # it_behaves_like 'invalid parameter returns 422', 'item', { :create => :post }, { item: { name: 'my finished item', done: 'correct' } }, 'Done is not included in the list'
+          end
+        end
       end
     end
     context 'user without key' do
-      it 'response unauthorized to unauthenticated user' do
-        post "/api/lists/#{list.id}/items", { item: { name: 'get it done' } }, 'HTTP_AUTHORIZATION' => nil
-        expect(response).to have_http_status(:unauthorized)
-      end
+      it_behaves_like 'unauthenticated user', 'item', { :create => :post }, { item: { name: 'get it done' } }
     end
     context 'with expired key' do
       it_behaves_like 'expired key', 'item', { :create => :post }, { item: { name: 'get it done' } }
@@ -127,28 +140,37 @@ RSpec.describe Api::ItemsController, type: :request do
       @item_update = create(:item, list_id: list.id)
     end
     context 'user with active key' do
-      it_behaves_like 'active key', 'item', { :update => :patch }, { item: { name: 'my finished item', done: true } }
+      it_behaves_like 'active valid key', 'item', { :update => :patch }, { item: { name: 'my finished item', done: true } }
       it 'saves attributes' do
         patch "/api/lists/#{list.id}/items/#{@item_update.id}", { item: { name: 'my finished item', done: true } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
         expect(response_in_json['item']['name']).to eq('my finished item')
         expect(response_in_json['item']['done']).to eq(true)
       end
-      context 'invalid done attribute value' do
-        it 'raises exception status' do
-          patch "/api/lists/#{list.id}/items/#{@item_update.id}", { item: { name: 'my finished item', done: nil } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-          expect(response.status).to eq(422)
+      context 'invalid attributes' do
+        context 'empty attributes' do
+          context 'status code' do
+            it_behaves_like 'invalid parameter returns 422', 'item', { :update => :patch }, { item: { name: '', done: false } }
+            it_behaves_like 'invalid parameter returns 422', 'item', { :update => :patch }, { item: { name: 'my finished item', done: nil } }
+          end
+          context 'json message' do
+            it_behaves_like 'invalid parameter returns error in json', 'item', { :update => :patch }, { item: { name: '', done: false } }, 'Name can\'t be blank'
+            it_behaves_like 'invalid parameter returns error in json', 'item', { :update => :patch }, { item: { name: 'my finished item', done: nil } }, 'Done is not included in the list'
+          end
         end
-        it 'produces appropriate error message' do
-          patch "/api/lists/#{list.id}/items/#{@item_update.id}", { item: { name: 'my finished item', done: nil } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-          expect(response_in_json['errors'][0]).to eq('Done is not included in the list')
+        context 'incorrect attributes' do
+          context 'status code' do
+            # it_behaves_like 'invalid parameter returns error in json', 'item', { :update => :patch }, { item: { name: 1, done: false } }
+            # it_behaves_like 'invalid parameter returns 422', 'item', { :update => :patch }, { item: { name: 'my finished item', done: 'correct' } }
+          end
+          context 'json message' do
+            # it_behaves_like 'invalid parameter returns error in json', 'item', { :update => :patch }, { item: { name: 1, done: false } }, 'Name can\'t be blank'
+            # it_behaves_like 'invalid parameter returns 422', 'item', { :update => :patch }, { item: { name: 'my finished item', done: 'correct' } }, 'Done is not included in the list'
+          end
         end
       end
     end
     context 'user without key' do
-      it 'responds with unauthorized to unauthenticated user' do
-        patch "/api/lists/#{list.id}/items/#{@item_update.id}", { item: { name: 'my finished item', done: true } }, 'HTTP_AUTHORIZATION' =>  nil # rubocop:disable Metrics/LineLength
-        expect(response).to have_http_status(:unauthorized)
-      end
+      it_behaves_like 'unauthenticated user', 'item', { :update => :patch }, { item: { name: 'my finished item', done: true } }
     end
     context 'with expired key' do
       it_behaves_like 'expired key', 'item', { :update => :patch }, { item: { name: 'my finished item', done: true } }
