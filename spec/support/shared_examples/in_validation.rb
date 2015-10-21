@@ -21,6 +21,7 @@ shared_examples 'invalid parameter returns error in json' do |object, verb_pair,
       path = build_path(object, action)
       send(request, path, parameters, 'HTTP_AUTHORIZATION' => key)
     end
+    # binding.pry
     expect(response_in_json['errors'][0]).to eq(message)
   end
 end

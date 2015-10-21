@@ -115,11 +115,11 @@ RSpec.describe Api::ItemsController, type: :request do
         context 'incorrect attributes' do
           context 'status code' do
             # it_behaves_like 'invalid parameter returns error in json', 'item', { :create => :post }, { item: { name: 1, done: false } }
-            # it_behaves_like 'invalid parameter returns 422', 'item', { :create => :post }, { item: { name: 'my finished item', done: 'correct' } }
+            # it_behaves_like 'invalid parameter returns error in json', 'item', { :create => :post }, { item: { name: 'my finished item', done: 'correct' } }
           end
           context 'json message' do
             # it_behaves_like 'invalid parameter returns error in json', 'item', { :create => :post }, { item: { name: 1, done: false } }, 'Name can\'t be blank'
-            # it_behaves_like 'invalid parameter returns 422', 'item', { :create => :post }, { item: { name: 'my finished item', done: 'correct' } }, 'Done is not included in the list'
+            # it_behaves_like 'invalid parameter returns error in json', 'item', { :create => :post }, { item: { name: 'my finished item', done: 'correct' } }, 'Done is not included in the list'
           end
         end
       end
@@ -150,21 +150,22 @@ RSpec.describe Api::ItemsController, type: :request do
         context 'empty attributes' do
           context 'status code' do
             it_behaves_like 'invalid parameter returns 422', 'item', { :update => :patch }, { item: { name: '', done: false } }
-            it_behaves_like 'invalid parameter returns 422', 'item', { :update => :patch }, { item: { name: 'my finished item', done: nil } }
+            it_behaves_like 'invalid parameter returns 422', 'item', { :update => :patch }, { item: { name: 'my finished item', done: '' } }
           end
           context 'json message' do
             it_behaves_like 'invalid parameter returns error in json', 'item', { :update => :patch }, { item: { name: '', done: false } }, 'Name can\'t be blank'
-            it_behaves_like 'invalid parameter returns error in json', 'item', { :update => :patch }, { item: { name: 'my finished item', done: nil } }, 'Done is not included in the list'
+            it_behaves_like 'invalid parameter returns error in json', 'item', { :update => :patch }, { item: { name: 'my finished item', done: '' } }, 'Done is not included in the list'
           end
         end
         context 'incorrect attributes' do
           context 'status code' do
             # it_behaves_like 'invalid parameter returns error in json', 'item', { :update => :patch }, { item: { name: 1, done: false } }
-            # it_behaves_like 'invalid parameter returns 422', 'item', { :update => :patch }, { item: { name: 'my finished item', done: 'correct' } }
+            it_behaves_like 'invalid parameter returns 422', 'item', { :update => :patch }, { item: { name: 'my finished item', done: nil } }
           end
           context 'json message' do
             # it_behaves_like 'invalid parameter returns error in json', 'item', { :update => :patch }, { item: { name: 1, done: false } }, 'Name can\'t be blank'
-            # it_behaves_like 'invalid parameter returns 422', 'item', { :update => :patch }, { item: { name: 'my finished item', done: 'correct' } }, 'Done is not included in the list'
+            # it_behaves_like 'invalid parameter returns error in json', 'item', { :update => :patch }, { item: { name: 'my finished item', done: 'yes' } }, 'Done is not included in the list'
+            it_behaves_like 'invalid parameter returns error in json', 'item', { :update => :patch }, { item: { name: 'my finished item', done: nil } }, 'Done is not included in the list'
           end
         end
       end
