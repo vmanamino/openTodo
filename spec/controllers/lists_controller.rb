@@ -116,6 +116,26 @@ RSpec.describe Api::ListsController, type: :controller do
         post :create, user_id: user_other.id, list: { name: 'my list'}
         expect(response).to have_http_status(:unauthorized)
       end
+      context 'invalid attributes' do
+        context 'empty' do
+          context 'code 422' do
+            it_behaves_like 'create invalid parameter returns 422', 'list', { name: '', permissions: 'viewable' }
+            it_behaves_like 'create invalid parameter returns 422', 'list', { name: 'new and improved', permissions: '' }
+          end
+          context 'json error' do
+            it_behaves_like 'create invalid parameter returns error in json', 'list', { name: '', permissions: 'viewable' }, 'Name can\'t be blank'
+            it_behaves_like 'create invalid parameter returns error in json', 'list', { name: 'new and improved', permissions: '' }, 'Permissions is not included in the list' # rubocop:disable Metrics/LineLength
+          end
+        end
+        context 'incorrect' do
+          context '422' do
+            it_behaves_like 'create invalid parameter returns 422', 'list', { name: 'new and improved', permissions: 'cannot be updated' }
+          end
+          context 'json' do
+            it_behaves_like 'create invalid parameter returns error in json', 'list', { name: 'new and improved', permissions: 'cannot be updated' }, 'Permissions is not included in the list' # rubocop:disable Metrics/LineLength
+          end
+        end
+      end
     end
     context 'user with no key' do
       it_behaves_like 'create unauthorized', 'list', { name: 'my list', permissions: 'viewable' }
@@ -149,18 +169,24 @@ RSpec.describe Api::ListsController, type: :controller do
         expect(updated_list.name).to eq('new and improved')
         expect(updated_list.permissions).to eq('private')
       end
-      context 'invalid permissions' do
-        it 'raises exception status' do
-          patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'cannot be updated' } # rubocop:disable Metrics/LineLength
-          expect(response).to have_http_status(:unprocessable_entity)
+      context 'invalid parameters' do
+        context 'empty attributes' do
+          context 'returns 422' do
+            it_behaves_like 'update invalid parameter returns 422', 'list', { name: '', permissions: 'viewable' }
+            it_behaves_like 'update invalid parameter returns 422', 'list', { name: 'new and improved', permissions: '' }
+          end
+          context 'returns json' do
+            it_behaves_like 'update invalid parameter returns error in json', 'list', { name: '', permissions: 'viewable' }, 'Name can\'t be blank'
+            it_behaves_like 'update invalid parameter returns error in json', 'list', { name: 'new and improved', permissions: '' }, 'Permissions is not included in the list' # rubocop:disable Metrics/LineLength
+          end
         end
-        it 'responds with 422 code' do
-          patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'cannot be updated' } # rubocop:disable Metrics/LineLength
-          expect(response.status).to eq(422)
-        end
-        it 'appropriate error message' do
-          patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'cannot be updated' } # rubocop:disable Metrics/LineLength
-          expect(response_in_json['errors'][0]).to eq('Permissions is not included in the list')
+        context 'incorrect attributes' do
+          context 'returns 422' do
+            it_behaves_like 'update invalid parameter returns 422', 'list', { name: 'new and improved', permissions: 'cannot be updated' }
+          end
+          context 'returns json' do
+            it_behaves_like 'update invalid parameter returns error in json', 'list', { name: 'new and improved', permissions: 'cannot be updated' }, 'Permissions is not included in the list' # rubocop:disable Metrics/LineLength
+          end
         end
       end
     end
@@ -178,7 +204,7 @@ RSpec.describe Api::ListsController, type: :controller do
         http_key_auth
       end
       it_behaves_like 'update with the wrong key', 'list', { name: 'new and improved', permissions: 'private' }
-      it_behaves_like 'update with the wrong key message', 'list', { name: 'new and improved', permissions: 'private' }, 'you are not the owner of the requested list'
+      it_behaves_like 'update with the wrong key message', 'list', { name: 'new and improved', permissions: 'private' }, 'you are not the owner of the requested list' # rubocop:disable Metrics/LineLength
     end
   end
   describe '#destroy' do
