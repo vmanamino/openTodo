@@ -34,13 +34,13 @@ RSpec.describe Api::ApiKeysController, type: :controller do
   end
   describe '#update' do
     it 'expired key has no time left' do
-      expect(api_key.expires_at - Time.now).to be < 0
+      expect(api_key.expires_at - Time.now).to be < 0 # rubocop:disable Rails/TimeZone
     end
     it 'updated key has one day' do
       http_login
       patch :update, id: api_key.id
       api_key.reload
-      expect(((api_key.expires_at - Time.now)/1.day).round).to eq 1
+      expect(((api_key.expires_at - Time.now) / 1.day).round).to eq 1 # rubocop:disable Rails/TimeZone
     end
   end
 end

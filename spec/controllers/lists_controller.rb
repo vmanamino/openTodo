@@ -62,7 +62,7 @@ RSpec.describe Api::ListsController, type: :controller do
       before do
         http_key_auth
       end
-      it_behaves_like 'create with active valid key', 'list', { name: 'my shared example list', permissions: 'viewable' }
+      it_behaves_like 'create with active valid key', 'list', { name: 'my shared example list', permissions: 'viewable' } # rubocop:disable all
       it 'new list in JSON' do
         post :create, user_id: user.id, list: { name: 'my new list' }
         expect(response_in_json['list']['name']).to eq('my new list')
@@ -113,45 +113,45 @@ RSpec.describe Api::ListsController, type: :controller do
       end
       it 'responds with unauthorized when key user not user in params' do
         user_other = create(:user)
-        post :create, user_id: user_other.id, list: { name: 'my list'}
+        post :create, user_id: user_other.id, list: { name: 'my list' }
         expect(response).to have_http_status(:unauthorized)
       end
       context 'invalid attributes' do
         context 'empty' do
           context 'code 422' do
-            it_behaves_like 'create invalid parameter returns 422', 'list', { name: '', permissions: 'viewable' }
-            it_behaves_like 'create invalid parameter returns 422', 'list', { name: 'new and improved', permissions: '' }
+            it_behaves_like 'create invalid parameter returns 422', 'list', { name: '', permissions: 'viewable' } # rubocop:disable all
+            it_behaves_like 'create invalid parameter returns 422', 'list', { name: 'new and improved', permissions: '' } # rubocop:disable all
           end
           context 'json error' do
-            it_behaves_like 'create invalid parameter returns error in json', 'list', { name: '', permissions: 'viewable' }, 'Name can\'t be blank'
-            it_behaves_like 'create invalid parameter returns error in json', 'list', { name: 'new and improved', permissions: '' }, 'Permissions is not included in the list' # rubocop:disable Metrics/LineLength
+            it_behaves_like 'create invalid parameter returns error in json', 'list', { name: '', permissions: 'viewable' }, 'Name can\'t be blank' # rubocop:disable all
+            it_behaves_like 'create invalid parameter returns error in json', 'list', { name: 'new and improved', permissions: '' }, 'Permissions is not included in the list' # rubocop:disable all
           end
         end
         context 'incorrect' do
           context '422' do
-            it_behaves_like 'create invalid parameter returns 422', 'list', { name: 'new and improved', permissions: 'cannot be updated' }
+            it_behaves_like 'create invalid parameter returns 422', 'list', { name: 'new and improved', permissions: 'cannot be updated' } # rubocop:disable all
           end
           context 'json' do
-            it_behaves_like 'create invalid parameter returns error in json', 'list', { name: 'new and improved', permissions: 'cannot be updated' }, 'Permissions is not included in the list' # rubocop:disable Metrics/LineLength
+            it_behaves_like 'create invalid parameter returns error in json', 'list', { name: 'new and improved', permissions: 'cannot be updated' }, 'Permissions is not included in the list' # rubocop:disable all
           end
         end
       end
     end
     context 'user with no key' do
-      it_behaves_like 'create unauthorized', 'list', { name: 'my list', permissions: 'viewable' }
+      it_behaves_like 'create unauthorized', 'list', { name: 'my list', permissions: 'viewable' } # rubocop:disable all
     end
     context 'expired key' do
       before do
         http_key_auth
       end
-      it_behaves_like 'create with expired key', 'list', { name: 'my shared example list', permissions: 'viewable' }
+      it_behaves_like 'create with expired key', 'list', { name: 'my shared example list', permissions: 'viewable' } # rubocop:disable all
     end
     context 'user with wrong key' do
       before do
         http_key_auth
       end
-      it_behaves_like 'create with the wrong key', 'list', { name: 'my shared example list', permissions: 'viewable' }
-      it_behaves_like 'create with the wrong key message', 'list', { name: 'my shared example list', permissions: 'viewable' }, 'you are not the owner of the requested list' # rubocop:disable Metrics/LineLength
+      it_behaves_like 'create with the wrong key', 'list', { name: 'my shared example list', permissions: 'viewable' } # rubocop:disable all
+      it_behaves_like 'create with the wrong key message', 'list', { name: 'my shared example list', permissions: 'viewable' }, 'you are not the owner of the requested list' # rubocop:disable all
     end
   end
   describe '#update' do
@@ -162,9 +162,9 @@ RSpec.describe Api::ListsController, type: :controller do
       before do
         http_key_auth
       end
-      it_behaves_like 'update with active valid key', 'list', { name: 'new and improved', permissions: 'private' }
+      it_behaves_like 'update with active valid key', 'list', { name: 'new and improved', permissions: 'private' } # rubocop:disable all
       it 'saves attributes' do
-        patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'private' }
+        patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'private' } # rubocop:disable all
         updated_list = List.find(@list_update.id)
         expect(updated_list.name).to eq('new and improved')
         expect(updated_list.permissions).to eq('private')
@@ -172,39 +172,39 @@ RSpec.describe Api::ListsController, type: :controller do
       context 'invalid parameters' do
         context 'empty attributes' do
           context 'returns 422' do
-            it_behaves_like 'update invalid parameter returns 422', 'list', { name: '', permissions: 'viewable' }
-            it_behaves_like 'update invalid parameter returns 422', 'list', { name: 'new and improved', permissions: '' }
+            it_behaves_like 'update invalid parameter returns 422', 'list', { name: '', permissions: 'viewable' } # rubocop:disable all
+            it_behaves_like 'update invalid parameter returns 422', 'list', { name: 'new and improved', permissions: '' } # rubocop:disable all
           end
           context 'returns json' do
-            it_behaves_like 'update invalid parameter returns error in json', 'list', { name: '', permissions: 'viewable' }, 'Name can\'t be blank'
-            it_behaves_like 'update invalid parameter returns error in json', 'list', { name: 'new and improved', permissions: '' }, 'Permissions is not included in the list' # rubocop:disable Metrics/LineLength
+            it_behaves_like 'update invalid parameter returns error in json', 'list', { name: '', permissions: 'viewable' }, 'Name can\'t be blank' # rubocop:disable all
+            it_behaves_like 'update invalid parameter returns error in json', 'list', { name: 'new and improved', permissions: '' }, 'Permissions is not included in the list' # rubocop:disable all
           end
         end
         context 'incorrect attributes' do
           context 'returns 422' do
-            it_behaves_like 'update invalid parameter returns 422', 'list', { name: 'new and improved', permissions: 'cannot be updated' }
+            it_behaves_like 'update invalid parameter returns 422', 'list', { name: 'new and improved', permissions: 'cannot be updated' } # rubocop:disable all
           end
           context 'returns json' do
-            it_behaves_like 'update invalid parameter returns error in json', 'list', { name: 'new and improved', permissions: 'cannot be updated' }, 'Permissions is not included in the list' # rubocop:disable Metrics/LineLength
+            it_behaves_like 'update invalid parameter returns error in json', 'list', { name: 'new and improved', permissions: 'cannot be updated' }, 'Permissions is not included in the list' # rubocop:disable all
           end
         end
       end
     end
     context 'user without key' do
-      it_behaves_like 'update unauthorized', 'list', { name: 'new and improved', permissions: 'private' }
+      it_behaves_like 'update unauthorized', 'list', { name: 'new and improved', permissions: 'private' } # rubocop:disable all
     end
     context 'user with expired key' do
       before do
         http_key_auth
       end
-      it_behaves_like 'update with expired key', 'list', { name: 'new and improved', permissions: 'private' }
+      it_behaves_like 'update with expired key', 'list', { name: 'new and improved', permissions: 'private' } # rubocop:disable all
     end
     context 'user with wrong key' do
       before do
         http_key_auth
       end
-      it_behaves_like 'update with the wrong key', 'list', { name: 'new and improved', permissions: 'private' }
-      it_behaves_like 'update with the wrong key message', 'list', { name: 'new and improved', permissions: 'private' }, 'you are not the owner of the requested list' # rubocop:disable Metrics/LineLength
+      it_behaves_like 'update with the wrong key', 'list', { name: 'new and improved', permissions: 'private' } # rubocop:disable all
+      it_behaves_like 'update with the wrong key message', 'list', { name: 'new and improved', permissions: 'private' }, 'you are not the owner of the requested list' # rubocop:disable all
     end
   end
   describe '#destroy' do
@@ -223,7 +223,7 @@ RSpec.describe Api::ListsController, type: :controller do
         end
       end
       context 'item dependents' do
-         it 'destroys item dependents' do
+        it 'destroys item dependents' do
           items = Item.all
           expect(items.length).to eq(5)
           delete :destroy, user_id: user.id, id: @list_destroy.id

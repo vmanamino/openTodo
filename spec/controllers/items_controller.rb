@@ -65,7 +65,7 @@ RSpec.describe Api::ItemsController, type: :controller do
       before do
         http_key_auth
       end
-      it_behaves_like 'create with active valid key', 'item', { name: 'get it done' } # rubocop:disable Style/BracesAroundHashParameters
+      it_behaves_like 'create with active valid key', 'item', { name: 'get it done' } # rubocop:disable all
       it 'new item in JSON' do
         http_key_auth
         post :create, list_id: list.id, item: { name: 'new thing to do' }
@@ -109,41 +109,47 @@ RSpec.describe Api::ItemsController, type: :controller do
       context 'invalid attributes' do
         context 'empty' do
           context '422' do
-            # it_behaves_like 'create invalid parameter returns 422', 'item', { name: 'my finished item', done: '' }
-            # it_behaves_like 'create invalid parameter returns 422', 'item', { name: 'my finished item', done: nil }
-            it_behaves_like 'create invalid parameter returns 422', 'item', { name: '', done: true } # rubocop:disable Style/BracesAroundHashParameters
+            # it_behaves_like 'create invalid parameter returns 422', 'item',
+            # { name: 'my finished item', done: '' }
+            # it_behaves_like 'create invalid parameter returns 422', 'item',
+            # { name: 'my finished item', done: nil }
+            it_behaves_like 'create invalid parameter returns 422', 'item', { name: '', done: true } # rubocop:disable all
           end
           context 'json' do
-            # it_behaves_like 'create invalid parameter returns error in json', 'item', { name: 'my finished item', done: '' }, 'Done is not included in the list'
-            # it_behaves_like 'create invalid parameter returns error in json', 'item', { name: 'my finished item', done: nil }, 'Done is not included in the list'
-            it_behaves_like 'create invalid parameter returns error in json', 'item', { name: '', done: true }, 'Name can\'t be blank' # rubocop:disable Style/BracesAroundHashParameters
+            # it_behaves_like 'create invalid parameter returns error in json', 'item',
+            # { name: 'my finished item', done: '' }, 'Done is not included in the list'
+            # it_behaves_like 'create invalid parameter returns error in json', 'item',
+            # { name: 'my finished item', done: nil }, 'Done is not included in the list'
+            it_behaves_like 'create invalid parameter returns error in json', 'item', { name: '', done: true }, 'Name can\'t be blank' # rubocop:disable all
           end
         end
         context 'incorrect' do
           context '422' do
-            # it_behaves_like 'create invalid parameter returns 422', 'item', { name: 'my finished item', done: 'not done' }
+            # it_behaves_like 'create invalid parameter returns 422', 'item',
+            # { name: 'my finished item', done: 'not done' }
           end
           context 'json' do
-            # it_behaves_like 'create invalid parameter returns error in json', 'item', { name: 'my finished item', done: 'not done' }, 'Done is not included in the list'
+            # it_behaves_like 'create invalid parameter returns error in json', 'item',
+            # { name: 'my finished item', done: 'not done' }, 'Done is not included in the list'
           end
         end
       end
     end
     context 'user without key' do
-      it_behaves_like 'create unauthorized', 'item', { name: 'get it done' } # rubocop:disable Style/BracesAroundHashParameters
+      it_behaves_like 'create unauthorized', 'item', { name: 'get it done' } # rubocop:disable all
     end
     context 'user with expired key' do
       before do
         http_key_auth
       end
-      it_behaves_like 'create with expired key', 'item', { name: 'get it done' } # rubocop:disable Style/BracesAroundHashParameters
+      it_behaves_like 'create with expired key', 'item', { name: 'get it done' } # rubocop:disable all
     end
     context 'user with wrong key' do
       before do
         http_key_auth
       end
-      it_behaves_like 'create with the wrong key', 'item', { name: 'get it done' } # rubocop:disable Style/BracesAroundHashParameters
-      it_behaves_like 'create with the wrong key message', 'item', { name: 'get it done' }, 'you are not the list owner' # rubocop:disable Style/BracesAroundHashParameters
+      it_behaves_like 'create with the wrong key', 'item', { name: 'get it done' } # rubocop:disable all
+      it_behaves_like 'create with the wrong key message', 'item', { name: 'get it done' }, 'you are not the list owner' # rubocop:disable all
     end
   end
   describe '#update' do
@@ -154,7 +160,7 @@ RSpec.describe Api::ItemsController, type: :controller do
       before do
         http_key_auth
       end
-      it_behaves_like 'update with active valid key', 'item', item: { name: 'my finished item', done: true } # rubocop:disable Style/BracesAroundHashParameters
+      it_behaves_like 'update with active valid key', 'item', { name: 'my finished item', done: true } # rubocop:disable all
       it 'saves attributes' do
         patch :update, list_id: list.id, id: @item_update.id, item: { name: 'my finished item', done: true }
         updated_item = Item.find(@item_update.id)
@@ -164,41 +170,43 @@ RSpec.describe Api::ItemsController, type: :controller do
       context 'invalid attributes' do
         context 'empty' do
           context '422' do
-            it_behaves_like 'update invalid parameter returns 422', 'item', { name: 'my finished item', done: '' } # rubocop:disable Style/BracesAroundHashParameters
-            it_behaves_like 'update invalid parameter returns 422', 'item', { name: 'my finished item', done: nil } # rubocop:disable Style/BracesAroundHashParameters
-            it_behaves_like 'update invalid parameter returns 422', 'item', { name: '', done: true }
+            it_behaves_like 'update invalid parameter returns 422', 'item', { name: 'my finished item', done: '' } # rubocop:disable all
+            it_behaves_like 'update invalid parameter returns 422', 'item', { name: 'my finished item', done: nil } # rubocop:disable all
+            it_behaves_like 'update invalid parameter returns 422', 'item', { name: '', done: true } # rubocop:disable all
           end
           context 'json' do
-            it_behaves_like 'update invalid parameter returns error in json', 'item', { name: 'my finished item', done: '' }, 'Done is not included in the list' # rubocop:disable Style/BracesAroundHashParameters
-            it_behaves_like 'update invalid parameter returns error in json', 'item', { name: 'my finished item', done: nil }, 'Done is not included in the list' # rubocop:disable Style/BracesAroundHashParameters
-            it_behaves_like 'update invalid parameter returns error in json', 'item', { name: '', done: true }, 'Name can\'t be blank' # rubocop:disable Style/BracesAroundHashParameters
+            it_behaves_like 'update invalid parameter returns error in json', 'item', { name: 'my finished item', done: '' }, 'Done is not included in the list' # rubocop:disable all
+            it_behaves_like 'update invalid parameter returns error in json', 'item', { name: 'my finished item', done: nil }, 'Done is not included in the list' # rubocop:disable all
+            it_behaves_like 'update invalid parameter returns error in json', 'item', { name: '', done: true }, 'Name can\'t be blank' # rubocop:disable all
           end
         end
         context 'incorrect' do
           context '422' do
-            # it_behaves_like 'update invalid parameter returns 422', 'item', { name: 'my finished item', done: 'not done' }
+            # it_behaves_like 'update invalid parameter returns 422', 'item',
+            # { name: 'my finished item', done: 'not done' }
           end
           context 'json' do
-            # it_behaves_like 'update invalid parameter returns error in json', 'item', { name: 'my finished item', done: 'not done' }, 'Done is not included in the list'
+            # it_behaves_like 'update invalid parameter returns error in json', 'item',
+            # { name: 'my finished item', done: 'not done' }, 'Done is not included in the list'
           end
         end
       end
     end
     context 'user without key' do
-      it_behaves_like 'update unauthorized', 'item', { name: 'my finished item', done: true } # rubocop:disable Style/BracesAroundHashParameters
+      it_behaves_like 'update unauthorized', 'item', { name: 'my finished item', done: true } # rubocop:disable all
     end
     context 'user with expired key' do
       before do
         http_key_auth
       end
-      it_behaves_like 'update with expired key', 'item', item: { name: 'my finished item', done: true }
+      it_behaves_like 'update with expired key', 'item', { name: 'my finished item', done: true } # rubocop:disable all
     end
     context 'user with wrong key' do
       before do
         http_key_auth
       end
-      it_behaves_like 'update with the wrong key', 'item', { name: 'my finished item', done: true } # rubocop:disable Style/BracesAroundHashParameters
-      it_behaves_like 'update with the wrong key message', 'item', { name: 'my finished item', done: true }, 'you are not the list owner'
+      it_behaves_like 'update with the wrong key', 'item', { name: 'my finished item', done: true } # rubocop:disable all
+      it_behaves_like 'update with the wrong key message', 'item', { name: 'my finished item', done: true }, 'you are not the list owner' # rubocop:disable all
     end
   end
 end

@@ -82,6 +82,7 @@ shared_examples 'update with the wrong key message' do |object, parameters, mess
       when 'item'
         patch :update, list_id: list.id, id: @item_update.id, item: parameters
     end
+    # binding.pry
     expect(response_in_json['message']).to eq(message)
   end
 end
