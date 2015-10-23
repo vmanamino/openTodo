@@ -33,13 +33,4 @@ class Api::ItemsController < ApiController # rubocop:disable Style/ClassAndModul
   def item_params
     params.require(:item).permit(:name, :done)
   end
-
-#   def authorization
-#     key_owner = get_key_user
-#     list = List.find(params[:list_id])
-#     unless list.user.id == key_owner.id
-#       render json: { message: 'you are not the list owner' }, status: :unauthorized
-#     end
-#   end
-
 end

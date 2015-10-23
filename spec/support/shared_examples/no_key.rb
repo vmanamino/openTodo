@@ -14,31 +14,46 @@ shared_examples 'unauthenticated user' do |object, verb_pair, parameters|
 end
 
 shared_examples 'index unauthorized' do
-  it 'responds with unauthorized' do
+  it 'responds with unauthorized', type: :controller do
     get :index
     expect(response).to have_http_status(:unauthorized)
   end
 end
 
 shared_examples 'create unauthorized' do |object, parameters|
-  it 'responds with unauthorized' do
+  it 'responds with unauthorized', type: :controller do
     case object
-      when 'list'
-        post :create, user_id: user.id, list: parameters
-      when 'item'
-        post :create, list_id: list.id, item: parameters
+    when 'user'
+      post :create, user: parameters
+    when 'list'
+      post :create, user_id: user.id, list: parameters
+    when 'item'
+      post :create, list_id: list.id, item: parameters
     end
     expect(response).to have_http_status(:unauthorized)
   end
 end
 
 shared_examples 'update unauthorized' do |object, parameters|
-  it 'responds with unauthorized' do
+  it 'responds with unauthorized', type: :controller do
     case object
-      when 'list'
-        patch :update, user_id: user.id, id: @list_update.id, list: parameters
-      when 'item'
-        patch :update, list_id: list.id, id: @item_update.id, item: parameters
+    when 'list'
+      patch :update, user_id: user.id, id: @list_update.id, list: parameters
+    when 'item'
+      patch :update, list_id: list.id, id: @item_update.id, item: parameters
     end
+    expect(response).to have_http_status(:unauthorized)
+  end
+end
+
+shared_examples 'destroy unauthorized' do |object|
+  it 'responds with unauthorized', type: :controller do
+    case object
+    when 'user'
+      delete :destroy, id: @user_destroy.id
+    when 'list'
+      delete :destroy, id: @list_destroy.id
+    end
+    expect(response).to have_http_status(:unauthorized)
   end
 end

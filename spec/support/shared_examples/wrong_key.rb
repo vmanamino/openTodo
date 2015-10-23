@@ -35,10 +35,10 @@ shared_examples 'create with the wrong key' do |object, parameters|
   let(:api_key) { create(:api_key) }
   it 'responds with unauthorized', type: :controller do
     case object
-      when 'list'
-        post :create, user_id: user.id, list: parameters
-      when 'item'
-        post :create, list_id: list.id, item: parameters
+    when 'list'
+      post :create, user_id: user.id, list: parameters
+    when 'item'
+      post :create, list_id: list.id, item: parameters
     end
     expect(response).to have_http_status(:unauthorized)
   end
@@ -49,10 +49,10 @@ shared_examples 'create with the wrong key message' do |object, parameters, mess
   let(:api_key) { create(:api_key) }
   it 'responds with unauthorized', type: :controller do
     case object
-      when 'list'
-        post :create, user_id: user.id, list: parameters
-      when 'item'
-        post :create, list_id: list.id, item: parameters
+    when 'list'
+      post :create, user_id: user.id, list: parameters
+    when 'item'
+      post :create, list_id: list.id, item: parameters
     end
     expect(response_in_json['message']).to eq(message)
   end
@@ -63,10 +63,10 @@ shared_examples 'update with the wrong key' do |object, parameters|
   let(:api_key) { create(:api_key) }
   it 'responds with unauthorized', type: :controller do
     case object
-      when 'list'
-        patch :update, user_id: user.id, id: @list_update.id, list: parameters
-      when 'item'
-        patch :update, list_id: list.id, id: @item_update.id, item: parameters
+    when 'list'
+      patch :update, user_id: user.id, id: @list_update.id, list: parameters
+    when 'item'
+      patch :update, list_id: list.id, id: @item_update.id, item: parameters
     end
     expect(response).to have_http_status(:unauthorized)
   end
@@ -77,10 +77,10 @@ shared_examples 'update with the wrong key message' do |object, parameters, mess
   let(:api_key) { create(:api_key) }
   it 'responds with unauthorized', type: :controller do
     case object
-      when 'list'
-        patch :update, user_id: user.id, id: @list_update.id, list: parameters
-      when 'item'
-        patch :update, list_id: list.id, id: @item_update.id, item: parameters
+    when 'list'
+      patch :update, user_id: user.id, id: @list_update.id, list: parameters
+    when 'item'
+      patch :update, list_id: list.id, id: @item_update.id, item: parameters
     end
     # binding.pry
     expect(response_in_json['message']).to eq(message)
@@ -92,8 +92,8 @@ shared_examples 'destroy with the wrong key' do |object|
   let(:api_key) { create(:api_key) }
   it 'responds with unauthorized', type: :controller do
     case object
-      when 'list'
-        delete :destroy, user_id: user.id, id: @list_destroy.id
+    when 'list'
+      delete :destroy, user_id: user.id, id: @list_destroy.id
     end
     expect(response).to have_http_status(:unauthorized)
   end
@@ -104,10 +104,9 @@ shared_examples 'destroy with the wrong key message' do |object, message|
   let(:api_key) { create(:api_key) }
   it 'responds with unauthorized', type: :controller do
     case object
-      when 'list'
-        delete :destroy, user_id: user.id, id: @list_destroy.id
+    when 'list'
+      delete :destroy, user_id: user.id, id: @list_destroy.id
     end
     expect(response_in_json['message']).to eq(message)
   end
 end
-

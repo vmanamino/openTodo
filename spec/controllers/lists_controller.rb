@@ -217,10 +217,8 @@ RSpec.describe Api::ListsController, type: :controller do
         http_key_auth
       end
       it_behaves_like 'destroy with active valid key', 'list'
-      context 'list not found' do
-        it 'raises exception status not found' do
-          expect { delete :destroy, user_id: user.id, id: 100 }.to raise_exception(ActiveRecord::RecordNotFound)
-        end
+      context 'non-existent list object' do
+        it_behaves_like 'no object found controller', 'list'
       end
       context 'item dependents' do
         it 'destroys item dependents' do

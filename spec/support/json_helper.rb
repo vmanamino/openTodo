@@ -12,7 +12,7 @@ module JsonHelper
     expect(object[name].key?(attribute)).to be boolean
   end
 
-  def object_owner(collection, model, name, user)
+  def object_owner(collection, model, name, user) # rubocop:disable Metrics/AbcSize
     counter = 0
     my_model = Object.const_get(model)
     while counter < collection[name].length

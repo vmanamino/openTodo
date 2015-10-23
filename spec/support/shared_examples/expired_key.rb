@@ -32,10 +32,12 @@ shared_examples 'create with expired key' do |object, parameters|
   end
   it 'responds with unauthorized', type: :controller do
     case object
-      when 'list'
-        post :create, user_id: user.id, list: parameters
-      when 'item'
-        post :create, list_id: list.id, item: parameters
+    when 'user'
+      post :create, user: parameters
+    when 'list'
+      post :create, user_id: user.id, list: parameters
+    when 'item'
+      post :create, list_id: list.id, item: parameters
     end
     expect(response).to have_http_status(:unauthorized)
   end
@@ -47,10 +49,10 @@ shared_examples 'update with expired key' do |object, parameters|
   end
   it 'responds with unauthorized', type: :controller do
     case object
-      when 'list'
-        patch :update, user_id: user.id, id: @list_update.id, list: parameters
-      when 'item'
-        patch :update, list_id: list.id, id: @item_update.id, item: parameters
+    when 'list'
+      patch :update, user_id: user.id, id: @list_update.id, list: parameters
+    when 'item'
+      patch :update, list_id: list.id, id: @item_update.id, item: parameters
     end
     # binding.pry
     expect(response).to have_http_status(:unauthorized)
@@ -63,8 +65,10 @@ shared_examples 'destroy with expired key' do |object|
   end
   it 'responds with unauthorized', type: :controller do
     case object
-      when 'list'
-        delete :destroy, user_id: user.id, id: @list_destroy.id
+    when 'user'
+      delete :destroy, id: @user_destroy.id
+    when 'list'
+      delete :destroy, user_id: user.id, id: @list_destroy.id
     end
     expect(response).to have_http_status(:unauthorized)
   end

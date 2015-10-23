@@ -33,7 +33,7 @@ class ApiController < ApplicationController
     end
   end
 
-  def get_key_user
+  def get_key_user # rubocop:disable Style/AccessorMethodName
     user = ''
     authenticate_or_request_with_http_token do |token, _options|
       key = ApiKey.find_by(access_token: token)
@@ -42,10 +42,10 @@ class ApiController < ApplicationController
     user
   end
 
-  def authorization
+  def authorization # rubocop:disable all
     key_owner = get_key_user
     controller = params[:controller]
-    controller_name = /api\/([a-z]+)/.match(controller)[1]
+    controller_name = /api\/([a-z]+)/.match(controller)[1] # rubocop:disable Style/RegexpLiteral
     if controller_name == 'items'
       list = List.find(params[:list_id])
       unless list.user.id == key_owner.id
@@ -57,7 +57,7 @@ class ApiController < ApplicationController
         render json: { message: 'you are not the owner of the requested list' }, status: :unauthorized
       end
     else
-      render json: { message: 'you are not authorized to this action'}, status: :unauthorized
+      render json: { message: 'you are not authorized to this action' }, status: :unauthorized
     end
   end
 end

@@ -196,8 +196,8 @@ RSpec.describe Api::ListsController, type: :request do
         items.reload
         expect(items.length).to eq(0)
       end
-      it 'raises exception status not_found for missing list' do
-        expect { delete "/api/users/#{user.id}/lists/100", nil, 'HTTP_AUTHORIZATION' => key }.to raise_exception(ActiveRecord::RecordNotFound) # rubocop:disable Metrics/LineLength
+      context 'non-existent list object' do
+        it_behaves_like 'no object found', 'list'
       end
     end
     context 'user without key' do

@@ -1,55 +1,8 @@
 required simplecov
-Run options: include {:locations=>{"./spec/controllers/lists_controller.rb"=>[18]}}
-F
+Run options: include {:locations=>{"./spec/requests/users.rb"=>[66]}}
+..
 
-Failures:
+Finished in 0.09072 seconds (files took 2.4 seconds to load)
+2 examples, 0 failures
 
-  1) Api::ListsController#index active valid key behaves like action with active key responds with success
-     Failure/Error: send(verb, action)
-     NoMethodError:
-       undefined method `id' for nil:NilClass
-     Shared Example Group: "action with active key" called from ./spec/controllers/lists_controller.rb:18
-     # ./app/models/list.rb:2:in `block in <class:List>'
-     # /home/action/.gem/ruby/2.1.1/gems/activerecord-4.2.1/lib/active_record/scoping/named.rb:155:in `call'
-     # /home/action/.gem/ruby/2.1.1/gems/activerecord-4.2.1/lib/active_record/scoping/named.rb:155:in `block (2 levels) in scope'
-     # /home/action/.gem/ruby/2.1.1/gems/activerecord-4.2.1/lib/active_record/relation.rb:302:in `scoping'
-     # /home/action/.gem/ruby/2.1.1/gems/activerecord-4.2.1/lib/active_record/scoping/named.rb:155:in `block in scope'
-     # ./app/controllers/api/lists_controller.rb:6:in `index'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/metal/implicit_render.rb:4:in `send_action'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/abstract_controller/base.rb:198:in `process_action'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/metal/rendering.rb:10:in `process_action'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/abstract_controller/callbacks.rb:20:in `block in process_action'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:117:in `call'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:117:in `call'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:555:in `block (2 levels) in compile'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:505:in `call'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:505:in `call'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:92:in `_run_callbacks'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:776:in `_run_process_action_callbacks'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:81:in `run_callbacks'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/abstract_controller/callbacks.rb:19:in `process_action'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/metal/rescue.rb:29:in `process_action'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/metal/instrumentation.rb:32:in `block in process_action'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/notifications.rb:164:in `block in instrument'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/notifications/instrumenter.rb:20:in `instrument'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/notifications.rb:164:in `instrument'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/metal/instrumentation.rb:30:in `process_action'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/metal/params_wrapper.rb:250:in `process_action'
-     # /home/action/.gem/ruby/2.1.1/gems/activerecord-4.2.1/lib/active_record/railties/controller_runtime.rb:18:in `process_action'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/abstract_controller/base.rb:137:in `process'
-     # /home/action/.gem/ruby/2.1.1/gems/actionview-4.2.1/lib/action_view/rendering.rb:30:in `process'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/test_case.rb:632:in `process'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/test_case.rb:65:in `process'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/test_case.rb:508:in `get'
-     # ./spec/support/shared_examples/active_key.rb:32:in `block (3 levels) in <top (required)>'
-     # ./spec/support/shared_examples/active_key.rb:27:in `each_pair'
-     # ./spec/support/shared_examples/active_key.rb:27:in `block (2 levels) in <top (required)>'
-
-Finished in 0.13811 seconds (files took 3.54 seconds to load)
-1 example, 1 failure
-
-Failed examples:
-
-rspec ./spec/controllers/lists_controller.rb:18 # Api::ListsController#index active valid key behaves like action with active key responds with success
-
-Coverage report generated for RSpec to /home/action/code/openTodo/coverage. 60 / 99 LOC (60.61%) covered.
+Coverage report generated for RSpec to /home/action/code/openTodo/coverage. 48 / 78 LOC (61.54%) covered.
