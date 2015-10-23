@@ -1,13 +1,15 @@
 class Api::ListsController < ApiController # rubocop:disable Style/ClassAndModuleChildren
   before_action :authenticated?, unless: :keyed_open
+  before_action :authorization, only: [:create, :update, :destroy]
 
   def index
-    lists = List.all
+    user = get_key_user
+    lists = List.visible_to(user)
     render json: lists, each_serializer: ListSerializer
   end
 
   def create
-    user = User.find(params[:user_id])
+    user = get_key_user
     list = List.new(list_params)
     list.user_id = user.id
     if list.save
@@ -18,7 +20,8 @@ class Api::ListsController < ApiController # rubocop:disable Style/ClassAndModul
   end
 
   def update
-    list = List.find(params[:id])
+    user = get_key_user # assign user to variable for readability
+    list = List.visible_to(user).find(params[:id])
     if list.update_attributes(list_params)
       render json: list
     else
@@ -27,7 +30,8 @@ class Api::ListsController < ApiController # rubocop:disable Style/ClassAndModul
   end
 
   def destroy
-    list = List.find(params[:id])
+    user = get_key_user
+    list = List.visible_to(user).find(params[:id])
     list.destroy
     render json: {}, status: :no_content
   rescue ActiveRecord::RecordNotFound

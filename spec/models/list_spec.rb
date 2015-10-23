@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 describe List do
+  let(:user) { create(:user) }
   before do
     @list = create(:list)
   end
@@ -16,6 +17,21 @@ describe List do
     invalid_list.valid?
     expect(invalid_list.errors.full_messages[0]).to eq('Name can\'t be blank')
     expect(invalid_list.errors.full_messages[1]).to eq('Permissions is not included in the list')
+  end
+  describe '.visible_to' do
+    before do
+      @lists_own = create_list(:list, 5, user: user)
+      @lists_other = create_list(:list, 5)
+    end
+    it 'collects all lists which reference user in scope' do
+      lists = List.visible_to(user)
+      expect(lists.length).to eq(5)
+      counter = 0
+      while counter < lists.length
+        expect(lists[counter].user_id).to eq(user.id)
+        counter += 1
+      end
+    end
   end
   describe '.defaults' do
     it 'sets permissions to public when list is created' do

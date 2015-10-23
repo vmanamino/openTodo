@@ -5,7 +5,7 @@ include JsonHelper
 RSpec.describe Api::ApiKeysController, type: :request do
   let(:user) { create(:user) }
   let(:list) { create(:list, user: user) }
-  let(:api_key_old) { create(:api_key, expires_at: 1.day.ago) }
+  let(:api_key_old) { create(:api_key, expires_at: 1.day.ago, user: user) }
   let(:credentials) { user_credentials(user.username, user.password) }
   describe '#create request' do
     it 'responds with object serialized in json' do

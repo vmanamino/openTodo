@@ -1,8 +1,10 @@
 class Api::ItemsController < ApiController # rubocop:disable Style/ClassAndModuleChildren
   before_action :authenticated?, unless: :keyed_open
+  before_action :authorization, only: [:create, :update]
 
   def index
-    items = Item.all
+    user = get_key_user
+    items = Item.owned(user)
     render json: items, each_serializer: ItemSerializer
   end
 
@@ -25,6 +27,8 @@ class Api::ItemsController < ApiController # rubocop:disable Style/ClassAndModul
       render json: { errors: item.errors.full_messages }, status: :unprocessable_entity
     end
   end
+
+  private
 
   def item_params
     params.require(:item).permit(:name, :done)

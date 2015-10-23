@@ -12,6 +12,18 @@ module JsonHelper
     expect(object[name].key?(attribute)).to be boolean
   end
 
+  def object_owner(collection, model, name, user) # rubocop:disable Metrics/AbcSize
+    counter = 0
+    my_model = Object.const_get(model)
+    while counter < collection[name].length
+      id = collection[name][counter]['id']
+      object = my_model.find(id)
+      owner = object.user
+      expect(owner.id).to eq(user.id)
+      counter += 1
+    end
+  end
+
   def response_in_json
     # binding.pry
     JSON.parse(response.body)
