@@ -18,21 +18,26 @@ RSpec.describe Api::ListsController, type: :request do
       # + 5 lists = 15 lists WILL NOT appear in request responses
       @lists_private = create_list(:list, 5, permissions: 'private')
       @key_user = api_key.user
+      # these will not be included in request
+      @lists_user_archived = create_list(:list, 5, status: 'archived')
       @lists_user = create_list(:list, 5, user: @key_user) # 5 lists
       # + 5 = 10 lists WILL appear in request responses
       @lists_user_private = create_list(:list, 5, user: @key_user, permissions: 'private')
     end
     context 'user with active key' do
       it_behaves_like 'active valid key', 'list', { :index => :get }, nil # rubocop:disable Style/HashSyntax
-      it 'lists owned by key user returned' do
+      it 'active status lists owned by key user returned' do
         get '/api/lists', nil, 'HTTP_AUTHORIZATION' => key
         object_owner(response_in_json, 'List', 'lists', @key_user)
       end
       it 'lists owned/returned by key user are 10' do
         get '/api/lists', nil, 'HTTP_AUTHORIZATION' => key
         lists_all = List.all
-        expect(lists_all.length).to eq(25)
+        expect(lists_all.length).to eq(30)
         expect(response_in_json['lists'].length).to eq(10)
+      end
+      context 'active status' do
+        it_behaves_like 'index objects active status', 'lists'
       end
       it 'permitted lists include id' do
         get '/api/lists', nil, 'HTTP_AUTHORIZATION' => key
