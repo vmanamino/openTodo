@@ -17,6 +17,8 @@ include StatusHelper
 shared_examples 'creates object with active status' do |model, parameters|
   it 'creates active object', type: :request do
     case model
+    when 'user'
+      post '/api/users', { user: parameters }, 'HTTP_AUTHORIZATION' => key
     when 'list'
       post "/api/users/#{user.id}/lists", { list: parameters } , 'HTTP_AUTHORIZATION' => key
     end
@@ -29,6 +31,8 @@ end
 shared_examples 'destroy archives object' do |model|
   it 'object status becomes archived', type: :request do
     case model
+    when 'user'
+      delete "/api/users/#{@user_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
     when 'list'
       delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
     end

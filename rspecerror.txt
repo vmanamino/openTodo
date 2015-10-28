@@ -1,26 +1,23 @@
 required simplecov
-Run options: include {:locations=>{"./spec/requests/lists.rb"=>[71]}}
+Run options: include {:locations=>{"./spec/requests/users.rb"=>[107]}}
 F
 
 Failures:
 
-  1) Api::ListsController#create request user with active key behaves like creates object with active status creates active object
-     Failure/Error: post "/api/users/#{user.id}/lists", parameters , 'HTTP_AUTHORIZATION' => key
-     ActionController::ParameterMissing:
-       param is missing or the value is empty: list
-     Shared Example Group: "creates object with active status" called from ./spec/requests/lists.rb:71
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/metal/strong_parameters.rb:249:in `require'
-     # ./app/controllers/api/lists_controller.rb:44:in `list_params'
-     # ./app/controllers/api/lists_controller.rb:13:in `create'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/metal/implicit_render.rb:4:in `send_action'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/abstract_controller/base.rb:198:in `process_action'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_controller/metal/rendering.rb:10:in `process_action'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/abstract_controller/callbacks.rb:20:in `block in process_action'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:117:in `call'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:117:in `call'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:555:in `block (2 levels) in compile'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:505:in `call'
-     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:505:in `call'
+  1) Api::UsersController#destroy user with active valid key non-existent user object behaves like no object found responds with 404 object not found
+     Failure/Error: send(:delete, path, nil, 'HTTP_AUTHORIZATION' => key)
+     ActiveRecord::RecordNotFound:
+       Couldn't find User with 'id'=100
+     Shared Example Group: "no object found" called from ./spec/requests/users.rb:107
+     # /home/action/.gem/ruby/2.1.1/gems/activerecord-4.2.1/lib/active_record/core.rb:155:in `find'
+     # ./app/controllers/api_controller.rb:60:in `authorization'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:432:in `block in make_lambda'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:145:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:145:in `block in halting_and_conditional'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:504:in `call'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:504:in `block in call'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:504:in `each'
+     # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:504:in `call'
      # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:92:in `_run_callbacks'
      # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:776:in `_run_process_action_callbacks'
      # /home/action/.gem/ruby/2.1.1/gems/activesupport-4.2.1/lib/active_support/callbacks.rb:81:in `run_callbacks'
@@ -84,15 +81,15 @@ Failures:
      # /home/action/.gem/ruby/2.1.1/gems/rack-test-0.6.3/lib/rack/test.rb:244:in `process_request'
      # /home/action/.gem/ruby/2.1.1/gems/rack-test-0.6.3/lib/rack/test.rb:124:in `request'
      # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/testing/integration.rb:297:in `process'
-     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/testing/integration.rb:38:in `post'
+     # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/testing/integration.rb:56:in `delete'
      # /home/action/.gem/ruby/2.1.1/gems/actionpack-4.2.1/lib/action_dispatch/testing/integration.rb:344:in `block (2 levels) in <module:Runner>'
-     # ./spec/support/shared_examples/object_status.rb:21:in `block (2 levels) in <top (required)>'
+     # ./spec/support/shared_examples/no_object.rb:14:in `block (2 levels) in <top (required)>'
 
-Finished in 0.0796 seconds (files took 2.4 seconds to load)
+Finished in 0.07551 seconds (files took 2.38 seconds to load)
 1 example, 1 failure
 
 Failed examples:
 
-rspec ./spec/requests/lists.rb:71 # Api::ListsController#create request user with active key behaves like creates object with active status creates active object
+rspec ./spec/requests/users.rb:107 # Api::UsersController#destroy user with active valid key non-existent user object behaves like no object found responds with 404 object not found
 
-Coverage report generated for RSpec to /home/action/code/openTodo/coverage. 75 / 111 LOC (67.57%) covered.
+Coverage report generated for RSpec to /home/action/code/openTodo/coverage. 62 / 92 LOC (67.39%) covered.

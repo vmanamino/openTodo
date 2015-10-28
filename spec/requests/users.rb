@@ -45,17 +45,22 @@ RSpec.describe Api::UsersController, type: :request do
         post '/api/users', { user: { username: 'my new name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
         expect(response_in_json['user']['username']).to eq('my new name')
       end
-      it 'serialized user excludes private attribute' do
-        post '/api/users', { user: { username: 'my name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-        check_object(response_in_json, 'password', false)
+      context 'object user status' do
+        it_behaves_like 'creates object with active status', 'user', { username: 'my new name', password: 'is special' }
       end
-      it 'serialized user includes id' do
-        post '/api/users', { user: { username: 'my name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-        check_object(response_in_json, 'id', true)
-      end
-      it 'serialized user includes username' do
-        post '/api/users', { user: { username: 'my name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-        check_object(response_in_json, 'username', true)
+      context 'presence of attributes' do
+        it 'serialized user excludes private attribute' do
+          post '/api/users', { user: { username: 'my name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+          check_object(response_in_json, 'password', false)
+        end
+        it 'serialized user includes id' do
+          post '/api/users', { user: { username: 'my name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+          check_object(response_in_json, 'id', true)
+        end
+        it 'serialized user includes username' do
+          post '/api/users', { user: { username: 'my name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+          check_object(response_in_json, 'username', true)
+        end
       end
       it 'username matches value given' do
         post '/api/users', { user: { username: 'my name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
@@ -83,7 +88,8 @@ RSpec.describe Api::UsersController, type: :request do
   end
   describe '#destroy' do
     before do
-      @user_destroy = create(:user)
+      @user_destroy = user
+      @user_other = create(:user)
     end
     context 'user with active valid key' do
       it_behaves_like 'active valid key', 'user', { :destroy => :delete }, { user: { username: 'my name', password: 'is special' } } # rubocop:disable all
@@ -95,15 +101,21 @@ RSpec.describe Api::UsersController, type: :request do
         delete "/api/users/#{@user_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
         expect(response.status).to eq(204)
       end
-      context 'non-existent user object' do
-        it_behaves_like 'no object found', 'user', nil
+      context 'user object status' do
+        it_behaves_like 'destroy archives object', 'user'
       end
+#       context 'non-existent user object' do
+#         it_behaves_like 'no object found', 'user', nil
+#       end
     end
     context 'user without key' do
       it_behaves_like 'unauthenticated user', 'user', { :destroy => :delete }, nil # rubocop:disable Style/HashSyntax
     end
     context 'user with expired valid key' do
       it_behaves_like 'expired key', 'user', { :destroy => :delete }, nil # rubocop:disable Style/HashSyntax
+    end
+    context 'user not authorized' do
+      it_behaves_like 'wrong key', 'user', { :destroy => :delete }, nil # rubocop:disable Style/HashSyntax
     end
   end
 end
