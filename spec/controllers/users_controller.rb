@@ -6,40 +6,40 @@ include ExpiredKey
 RSpec.describe Api::UsersController, type: :controller do
   let(:user) { create(:user) }
   let(:api_key) { create(:api_key) }
-  describe '#index' do
-    before do
-      @users = create_list(:user, 5)
-    end
-    context 'active valid key' do
-      before do
-        http_key_auth
-      end
-      it_behaves_like 'index with active valid key'
-      it 'returns users serialized in json' do
-        get :index
-        expect(response_in_json['users'].length).to eq(6)
-      end
-      it 'serialized json excludes private attributes' do
-        get :index
-        check_each_object(response_in_json, 'password', false)
-      end
-      it 'serialized json includes specified attributes in UserSerializer' do
-        get :index
-        check_each_object(response_in_json, 'id', true)
-        check_each_object(response_in_json, 'username', true)
-      end
-    end
-    it 'unauthenticated user responds with http unauthorized' do
-      get :index
-      expect(response).to have_http_status(:unauthorized)
-    end
-    context 'user without key' do
-      it_behaves_like 'index unauthorized'
-    end
-    context 'user with expired key' do
-      it_behaves_like 'index with expired key'
-    end
-  end
+#   describe '#index' do
+#     before do
+#       @users = create_list(:user, 5)
+#     end
+#     context 'active valid key' do
+#       before do
+#         http_key_auth
+#       end
+#       it_behaves_like 'index with active valid key'
+#       it 'returns users serialized in json' do
+#         get :index
+#         expect(response_in_json['users'].length).to eq(6)
+#       end
+#       it 'serialized json excludes private attributes' do
+#         get :index
+#         check_each_object(response_in_json, 'password', false)
+#       end
+#       it 'serialized json includes specified attributes in UserSerializer' do
+#         get :index
+#         check_each_object(response_in_json, 'id', true)
+#         check_each_object(response_in_json, 'username', true)
+#       end
+#     end
+#     it 'unauthenticated user responds with http unauthorized' do
+#       get :index
+#       expect(response).to have_http_status(:unauthorized)
+#     end
+#     context 'user without key' do
+#       it_behaves_like 'index unauthorized'
+#     end
+#     context 'user with expired key' do
+#       it_behaves_like 'index with expired key'
+#     end
+#   end
   describe '#create' do
     context 'active valid key' do
       before do
@@ -107,14 +107,14 @@ RSpec.describe Api::UsersController, type: :controller do
       context 'non-existent user object' do
         it_behaves_like 'no object found controller', 'user'
       end
-      it 'destroys list dependents' do
-        all_lists = List.all
-        expect(all_lists.length).to eq(5)
-        http_key_auth
-        delete :destroy, id: @user_destroy.id
-        all_lists.reload
-        expect(all_lists.length).to eq(0)
-      end
+#       it 'destroys list dependents' do
+#         all_lists = List.all
+#         expect(all_lists.length).to eq(5)
+#         http_key_auth
+#         delete :destroy, id: @user_destroy.id
+#         all_lists.reload
+#         expect(all_lists.length).to eq(0)
+#       end
     end
     context 'user without key' do
       it_behaves_like 'destroy unauthorized', 'user'

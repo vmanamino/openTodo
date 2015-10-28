@@ -1,6 +1,6 @@
 class Item < ActiveRecord::Base
+  include Enums
 
-  enum status: [:active, :archived]
   belongs_to :list
 
   validates :name, presence: true

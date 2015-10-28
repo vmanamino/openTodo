@@ -1,15 +1,15 @@
 class List < ActiveRecord::Base
-  extend ActiveModel::Callbacks
+  include Enums
+
   scope :visible_to, -> (user) { where('user_id=? AND status=?', user.id, 0) }
 
-  enum status: [:active, :archived]
   belongs_to :user
   has_many :items, dependent: :destroy
 
   validates :name, presence: true
   validates :permissions, inclusion: %w( viewable private open ), allow_nil: false
+  # validates :status, inclusion: { in: statuses.keys }
 
-  # define_model_callbacks :archived, only: [:after]
   after_update :items_archived
   after_initialize :defaults, if: :new_record?
 

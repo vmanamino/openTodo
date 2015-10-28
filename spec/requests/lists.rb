@@ -19,7 +19,6 @@ RSpec.describe Api::ListsController, type: :request do
       @lists_private = create_list(:list, 5, permissions: 'private')
       @key_user = api_key.user
       # these will not be included in request
-      @lists_user_archived = create_list(:list, 5, status: 'archived')
       @lists_user = create_list(:list, 5, user: @key_user) # 5 lists
       # + 5 = 10 lists WILL appear in request responses
       @lists_user_private = create_list(:list, 5, user: @key_user, permissions: 'private')
@@ -33,27 +32,26 @@ RSpec.describe Api::ListsController, type: :request do
       it 'lists owned/returned by key user are 10' do
         get '/api/lists', nil, 'HTTP_AUTHORIZATION' => key
         lists_all = List.all
-        expect(lists_all.length).to eq(30)
+        expect(lists_all.length).to eq(25)
         expect(response_in_json['lists'].length).to eq(10)
       end
-      context 'active status' do
-        it_behaves_like 'index objects active status', 'lists'
-      end
-      it 'permitted lists include id' do
-        get '/api/lists', nil, 'HTTP_AUTHORIZATION' => key
-        check_each_object(response_in_json, 'lists', 'id', true)
-      end
-      it 'permitted lists include name' do
-        get '/api/lists', nil, 'HTTP_AUTHORIZATION' => key
-        check_each_object(response_in_json, 'lists', 'name', true)
-      end
-      it 'permitted lists include user_id' do
-        get '/api/lists', nil, 'HTTP_AUTHORIZATION' => key
-        check_each_object(response_in_json, 'lists', 'user_id', true)
-      end
-      it 'permitted lists include permissions' do
-        get '/api/lists', nil, 'HTTP_AUTHORIZATION' =>  key
-        check_each_object(response_in_json, 'lists', 'permissions', true)
+      context 'presence of attributes' do
+        it 'permitted lists include id' do
+          get '/api/lists', nil, 'HTTP_AUTHORIZATION' => key
+          check_each_object(response_in_json, 'lists', 'id', true)
+        end
+        it 'permitted lists include name' do
+          get '/api/lists', nil, 'HTTP_AUTHORIZATION' => key
+          check_each_object(response_in_json, 'lists', 'name', true)
+        end
+        it 'permitted lists include user_id' do
+          get '/api/lists', nil, 'HTTP_AUTHORIZATION' => key
+          check_each_object(response_in_json, 'lists', 'user_id', true)
+        end
+        it 'permitted lists include permissions' do
+          get '/api/lists', nil, 'HTTP_AUTHORIZATION' =>  key
+          check_each_object(response_in_json, 'lists', 'permissions', true)
+        end
       end
     end
     context 'user without key' do
@@ -70,17 +68,22 @@ RSpec.describe Api::ListsController, type: :request do
         post "/api/users/#{user.id}/lists", { list: { name: 'my new list' } }, 'HTTP_AUTHORIZATION' => key
         expect(response_in_json['list']['name']).to eq('my new list')
       end
-      it 'serialized list includes id' do
-        post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-        check_object(response_in_json, 'list', 'id', true)
+      context 'list object status' do
+        it_behaves_like 'creates object with active status', 'list', { name: 'my new list' }
       end
-      it 'serialized list includes name' do
-        post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-        check_object(response_in_json, 'list', 'name', true)
-      end
-      it 'serialized list includes user_id' do
-        post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
-        check_object(response_in_json, 'list', 'user_id', true)
+      context 'presence of attributes' do
+        it 'serialized list includes id' do
+          post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
+          check_object(response_in_json, 'list', 'id', true)
+        end
+        it 'serialized list includes name' do
+          post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
+          check_object(response_in_json, 'list', 'name', true)
+        end
+        it 'serialized list includes user_id' do
+          post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
+          check_object(response_in_json, 'list', 'user_id', true)
+        end
       end
       it 'list user is key user' do
         post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
@@ -98,10 +101,6 @@ RSpec.describe Api::ListsController, type: :request do
       it 'enter private permissions' do
         post "/api/users/#{user.id}/lists", { list: { name: 'my list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
         expect(response_in_json['list']['permissions']).to eq('private')
-      end
-      it 'failure responds with appropriate error message for absent name' do
-        post "/api/users/#{user.id}/lists", { list: { name: ' ' } }, 'HTTP_AUTHORIZATION' => key
-        expect(response_in_json['errors'][0]).to eq('Name can\'t be blank')
       end
       context 'invalid attributes' do
         context 'empty attributes' do
@@ -194,12 +193,11 @@ RSpec.describe Api::ListsController, type: :request do
         delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
         expect(response.status).to eq(204)
       end
-      it 'destroys item dependents' do
-        items = Item.all
-        expect(items.length).to eq(5)
-        delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
-        items.reload
-        expect(items.length).to eq(0)
+      context 'list object status' do
+        it_behaves_like 'destroy archives object', 'list'
+      end
+      context 'destroys dependents' do
+        it_behaves_like 'destroy archives object dependents', 'list', 'item', 5
       end
       context 'non-existent list object' do
         it_behaves_like 'no object found', 'list'
