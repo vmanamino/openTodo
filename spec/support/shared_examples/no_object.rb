@@ -20,8 +20,6 @@ end
 shared_examples 'no object found controller' do |object|
   it 'responds with 404 object not found', type: :controller do
     case object
-    when 'user'
-      delete :destroy, id: 100
     when 'list'
       delete :destroy, user_id: user.id, id: 100
     end

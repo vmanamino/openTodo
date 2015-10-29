@@ -89,6 +89,7 @@ RSpec.describe Api::UsersController, type: :request do
   describe '#destroy' do
     before do
       @user_destroy = user
+      @user_lists = create_list(:list, 5, user: @user_destroy)
       @user_other = create(:user)
     end
     context 'user with active valid key' do
@@ -104,9 +105,24 @@ RSpec.describe Api::UsersController, type: :request do
       context 'user object status' do
         it_behaves_like 'destroy archives object', 'user'
       end
-#       context 'non-existent user object' do
-#         it_behaves_like 'no object found', 'user', nil
-#       end
+      context 'destroy dependents' do
+        it_behaves_like 'destroy archives object dependents', 'user', 'list', 5
+      end
+      context 'destroy grandchildren' do # grandchildren are items of lists belonging to user
+        before do # create grandchildren items
+          @user_lists.each do |list|
+            create(:item, list: list)
+          end
+          @user_items = Item.all
+        end
+        it 'archives all items belonging user lists' do
+          delete "/api/users/#{@user_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
+          expect(Item.where(status: 0).all.length).to eq(0)
+          @user_items.each do |item|
+            expect(item.status).to eq('archived')
+          end
+        end
+      end
     end
     context 'user without key' do
       it_behaves_like 'unauthenticated user', 'user', { :destroy => :delete }, nil # rubocop:disable Style/HashSyntax
@@ -116,6 +132,7 @@ RSpec.describe Api::UsersController, type: :request do
     end
     context 'user not authorized' do
       it_behaves_like 'wrong key', 'user', { :destroy => :delete }, nil # rubocop:disable Style/HashSyntax
+      it_behaves_like 'wrong key with message', 'user', { :destroy => :delete }, nil, 'you are not the user' # rubocop:disable all
     end
   end
 end

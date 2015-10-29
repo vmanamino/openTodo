@@ -92,9 +92,12 @@ shared_examples 'destroy with the wrong key' do |object|
   let(:api_key) { create(:api_key) }
   it 'responds with unauthorized', type: :controller do
     case object
+    when 'user'
+      delete :destroy, id: @user_destroy.id
     when 'list'
       delete :destroy, user_id: user.id, id: @list_destroy.id
     end
+    # binding.pry
     expect(response).to have_http_status(:unauthorized)
   end
 end
@@ -104,9 +107,12 @@ shared_examples 'destroy with the wrong key message' do |object, message|
   let(:api_key) { create(:api_key) }
   it 'responds with unauthorized', type: :controller do
     case object
+    when 'user'
+      delete :destroy, id: @user_destroy.id
     when 'list'
       delete :destroy, user_id: user.id, id: @list_destroy.id
     end
+    # binding.pry
     expect(response_in_json['message']).to eq(message)
   end
 end

@@ -48,10 +48,24 @@ shared_examples 'destroy archives object dependents' do |model, dependent, numbe
     dependents = object.where(status: 0).all
     expect(dependents.length).to eq(number)
     case model
+    when 'user'
+      delete "/api/users/#{@user_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
     when 'list'
       delete "/api/users/#{user.id}/lists/#{@list_destroy.id}", nil, 'HTTP_AUTHORIZATION' => key
     end
     dependents = object.where(status: 0).all
     expect(dependents.length).to eq(0)
+  end
+end
+
+shared_examples 'create object status active' do |model, parameters|
+  it 'makes object active', type: :controller do
+    case model
+    when 'user'
+      post :create, user: parameters
+    end
+    object = Object.const_get(model.capitalize)
+    this_object = object.first
+    expect(this_object.status).to eq('active')
   end
 end
