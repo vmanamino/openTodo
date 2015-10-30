@@ -21,6 +21,8 @@ shared_examples 'creates object with active status' do |model, parameters|
       post '/api/users', { user: parameters }, 'HTTP_AUTHORIZATION' => key
     when 'list'
       post "/api/users/#{user.id}/lists", { list: parameters }, 'HTTP_AUTHORIZATION' => key
+    when 'item'
+      post "/api/lists/#{list.id}/items", { item: parameters }, 'HTTP_AUTHORIZATION' => key
     end
     object = Object.const_get(model.capitalize)
     this_object = object.first

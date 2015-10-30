@@ -26,6 +26,7 @@ RSpec.describe Api::UsersController, type: :controller do
         it 'serialized JSON excludes private attributes' do
           post :create, user: { username: 'newone', password: 'noone' }
           check_object(response_in_json, 'password', false)
+          check_object(response_in_json, 'status', false)
         end
         it 'serialized JSON includes attribute id' do
           post :create, user: { username: 'newone', password: 'noone' }

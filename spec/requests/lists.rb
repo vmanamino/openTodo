@@ -36,6 +36,10 @@ RSpec.describe Api::ListsController, type: :request do
         expect(response_in_json['lists'].length).to eq(10)
       end
       context 'presence of attributes' do
+        it 'permitted lists exclude status' do
+          get '/api/lists', nil, 'HTTP_AUTHORIZATION' => key
+          check_each_object(response_in_json, 'lists', 'status', false)
+        end
         it 'permitted lists include id' do
           get '/api/lists', nil, 'HTTP_AUTHORIZATION' => key
           check_each_object(response_in_json, 'lists', 'id', true)
@@ -72,6 +76,10 @@ RSpec.describe Api::ListsController, type: :request do
         it_behaves_like 'creates object with active status', 'list', { name: 'my new list' } # rubocop:disable all
       end
       context 'presence of attributes' do
+        it 'serialized list excludes status' do
+          post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
+          check_object(response_in_json, 'list', 'status', false)
+        end
         it 'serialized list includes id' do
           post "/api/users/#{user.id}/lists", { list: { name: 'my list' } }, 'HTTP_AUTHORIZATION' => key
           check_object(response_in_json, 'list', 'id', true)

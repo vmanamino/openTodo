@@ -31,21 +31,27 @@ RSpec.describe Api::ListsController, type: :controller do
         expect(lists_all.length).to eq(15)
         expect(response_in_json['lists'].length).to eq(5)
       end
-      it 'serialized json lists include id' do
-        get :index
-        check_each_object(response_in_json, 'lists', 'id', true)
-      end
-      it 'serialized json lists include name' do
-        get :index
-        check_each_object(response_in_json, 'lists', 'id', true)
-      end
-      it 'serialized json lists include permissions' do
-        get :index
-        check_each_object(response_in_json, 'lists', 'id', true)
-      end
-      it 'serialized json lists include user_id' do
-        get :index
-        check_each_object(response_in_json, 'lists', 'user_id', true)
+      context 'presence of attributes' do
+        it 'serialized json lists exclude status' do
+          get :index
+          check_each_object(response_in_json, 'lists', 'status', false)
+        end
+        it 'serialized json lists include id' do
+          get :index
+          check_each_object(response_in_json, 'lists', 'id', true)
+        end
+        it 'serialized json lists include name' do
+          get :index
+          check_each_object(response_in_json, 'lists', 'id', true)
+        end
+        it 'serialized json lists include permissions' do
+          get :index
+          check_each_object(response_in_json, 'lists', 'id', true)
+        end
+        it 'serialized json lists include user_id' do
+          get :index
+          check_each_object(response_in_json, 'lists', 'user_id', true)
+        end
       end
     end
     context 'user with no key' do
@@ -72,6 +78,10 @@ RSpec.describe Api::ListsController, type: :controller do
         it_behaves_like 'create object status active', 'list', { name: 'my new list' } # rubocop:disable all
       end
       context 'presence of attributes' do
+        it 'excludes status' do
+          post :create, user_id: user.id, list: { name: 'my list' }
+          check_object(response_in_json, 'list', 'status', false)
+        end
         it 'new list has default permissions \'viewable\'' do
           post :create, user_id: user.id, list: { name: 'my list' }
           expect(response_in_json['list']['permissions']).to eq('viewable')

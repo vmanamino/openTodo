@@ -36,21 +36,27 @@ RSpec.describe Api::ItemsController, type: :request do
         expect(items_all.length).to eq(20)
         expect(response_in_json['items'].length).to eq(10)
       end
-      it 'serialized items include id' do
-        get '/api/items', nil, 'HTTP_AUTHORIZATION' => key
-        check_each_object(response_in_json, 'items', 'id', true)
-      end
-      it 'serialized items include name' do
-        get '/api/items', nil, 'HTTP_AUTHORIZATION' => key
-        check_each_object(response_in_json, 'items', 'name', true)
-      end
-      it 'serialized json includes done' do
-        get '/api/items', nil, 'HTTP_AUTHORIZATION' => key
-        check_each_object(response_in_json, 'items', 'done', true)
-      end
-      it 'serialized json includes list reference' do
-        get '/api/items', nil, 'HTTP_AUTHORIZATION' => key
-        check_each_object(response_in_json, 'items', 'list_id', true)
+      context 'presence of attributes' do
+        it 'serialized items exclude status' do
+          get '/api/items', nil, 'HTTP_AUTHORIZATION' => key
+          check_each_object(response_in_json, 'items', 'status', false)
+        end
+        it 'serialized items include id' do
+          get '/api/items', nil, 'HTTP_AUTHORIZATION' => key
+          check_each_object(response_in_json, 'items', 'id', true)
+        end
+        it 'serialized items include name' do
+          get '/api/items', nil, 'HTTP_AUTHORIZATION' => key
+          check_each_object(response_in_json, 'items', 'name', true)
+        end
+        it 'serialized json includes done' do
+          get '/api/items', nil, 'HTTP_AUTHORIZATION' => key
+          check_each_object(response_in_json, 'items', 'done', true)
+        end
+        it 'serialized json includes list reference' do
+          get '/api/items', nil, 'HTTP_AUTHORIZATION' => key
+          check_each_object(response_in_json, 'items', 'list_id', true)
+        end
       end
     end
     context 'user without key' do
@@ -63,25 +69,34 @@ RSpec.describe Api::ItemsController, type: :request do
   describe '#create request' do
     context 'user with active key' do
       it_behaves_like 'active valid key', 'item', { :create => :post }, { item: { name: 'my item' } } # rubocop:disable all
+      context 'item object status' do
+        it_behaves_like 'creates object with active status', 'item', { name: 'my item' } # rubocop:disable all
+      end
       it 'responds with object serialized in JSON' do
         post "/api/lists/#{list.id}/items", { item: { name: 'my item' } }, 'HTTP_AUTHORIZATION' => key
         expect(response_in_json['item']['name']).to eq('my item')
       end
-      it 'serialized object includes id' do
-        post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => key
-        check_object(response_in_json, 'item', 'id', true)
-      end
-      it 'serialized object includes name' do
-        post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => key
-        check_object(response_in_json, 'item', 'name', true)
-      end
-      it 'serialized object includes list_id' do
-        post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => key
-        check_object(response_in_json, 'item', 'list_id', true)
-      end
-      it 'serialized object includes done' do
-        post "/api/lists/#{list.id}/items", { item: { name: 'get done on time' } }, 'HTTP_AUTHORIZATION' => key
-        check_object(response_in_json, 'item', 'done', true)
+      context 'presence of attributes' do
+        it 'serialized object excludes status' do
+          post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => key
+          check_object(response_in_json, 'item', 'status', false)
+        end
+        it 'serialized object includes id' do
+          post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => key
+          check_object(response_in_json, 'item', 'id', true)
+        end
+        it 'serialized object includes name' do
+          post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => key
+          check_object(response_in_json, 'item', 'name', true)
+        end
+        it 'serialized object includes list_id' do
+          post "/api/lists/#{list.id}/items", { item: { name: 'get done' } }, 'HTTP_AUTHORIZATION' => key
+          check_object(response_in_json, 'item', 'list_id', true)
+        end
+        it 'serialized object includes done' do
+          post "/api/lists/#{list.id}/items", { item: { name: 'get done on time' } }, 'HTTP_AUTHORIZATION' => key
+          check_object(response_in_json, 'item', 'done', true)
+        end
       end
       it 'name matches name entered' do
         post "/api/lists/#{list.id}/items", { item: { name: 'get done on time' } }, 'HTTP_AUTHORIZATION' => key

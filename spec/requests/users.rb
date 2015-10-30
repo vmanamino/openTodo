@@ -19,9 +19,10 @@ RSpec.describe Api::UsersController, type: :request do
         it_behaves_like 'creates object with active status', 'user', { username: 'my new name', password: 'is special' } # rubocop:disable all
       end
       context 'presence of attributes' do
-        it 'serialized user excludes private attribute' do
+        it 'serialized user excludes private attributes' do
           post '/api/users', { user: { username: 'my name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
           check_object(response_in_json, 'password', false)
+          check_object(response_in_json, 'status', false)
         end
         it 'serialized user includes id' do
           post '/api/users', { user: { username: 'my name', password: 'is special' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
