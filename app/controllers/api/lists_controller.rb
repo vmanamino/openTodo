@@ -32,7 +32,7 @@ class Api::ListsController < ApiController # rubocop:disable Style/ClassAndModul
   def destroy
     user = get_key_user
     list = List.visible_to(user).find(params[:id])
-    list.destroy
+    list.archived!
     render json: {}, status: :no_content
   rescue ActiveRecord::RecordNotFound
     render json: {}, status: :not_found

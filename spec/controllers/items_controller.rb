@@ -66,30 +66,35 @@ RSpec.describe Api::ItemsController, type: :controller do
         http_key_auth
       end
       it_behaves_like 'create with active valid key', 'item', { name: 'get it done' } # rubocop:disable all
+      context 'item object status' do
+        it_behaves_like 'create object status active', 'item', { name: 'get it done' } # rubocop:disable all
+      end
       it 'new item in JSON' do
         http_key_auth
         post :create, list_id: list.id, item: { name: 'new thing to do' }
         expect(response_in_json['item']['name']).to eq('new thing to do')
       end
-      it 'includes id' do
-        http_key_auth
-        post :create, list_id: list.id, item: { name: 'get it done' }
-        check_object(response_in_json, 'item', 'id', true)
-      end
-      it 'includes name' do
-        http_key_auth
-        post :create, list_id: list.id, item: { name: 'get it done' }
-        check_object(response_in_json, 'item', 'name', true)
-      end
-      it 'includes done' do
-        http_key_auth
-        post :create, list_id: list.id, item: { name: 'get it done' }
-        check_object(response_in_json, 'item', 'done', true)
-      end
-      it 'includes list_id' do
-        http_key_auth
-        post :create, list_id: list.id, item: { name: 'get it done' }
-        check_object(response_in_json, 'item', 'name', true)
+      context 'presence of attributes' do
+        it 'includes id' do
+          http_key_auth
+          post :create, list_id: list.id, item: { name: 'get it done' }
+          check_object(response_in_json, 'item', 'id', true)
+        end
+        it 'includes name' do
+          http_key_auth
+          post :create, list_id: list.id, item: { name: 'get it done' }
+          check_object(response_in_json, 'item', 'name', true)
+        end
+        it 'includes done' do
+          http_key_auth
+          post :create, list_id: list.id, item: { name: 'get it done' }
+          check_object(response_in_json, 'item', 'done', true)
+        end
+        it 'includes list_id' do
+          http_key_auth
+          post :create, list_id: list.id, item: { name: 'get it done' }
+          check_object(response_in_json, 'item', 'name', true)
+        end
       end
       it 'name matches value given' do
         http_key_auth

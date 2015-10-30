@@ -56,8 +56,11 @@ class ApiController < ApplicationController
       unless user.id == key_owner.id
         render json: { message: 'you are not the owner of the requested list' }, status: :unauthorized
       end
-    else
-      render json: { message: 'you are not authorized to this action' }, status: :unauthorized
+    elsif controller_name == 'users'
+      user = User.find(params[:id])
+      unless user.id == key_owner.id
+        render json: { message: 'you are not the user' }, status: :unauthorized
+      end
     end
   end
 end

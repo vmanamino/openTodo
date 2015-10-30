@@ -1,10 +1,6 @@
 class Api::UsersController < ApiController # rubocop:disable Style/ClassAndModuleChildren
   before_action :authenticated?, unless: :keyed_open
-
-  def index
-    users = User.all
-    render json: users, each_serializer: UserSerializer
-  end
+  before_action :authorization, only: [:destroy]
 
   def create
     user = User.new(user_params)
@@ -17,7 +13,7 @@ class Api::UsersController < ApiController # rubocop:disable Style/ClassAndModul
 
   def destroy
     user = User.find(params[:id])
-    user.destroy
+    user.archived!
     render json: {}, status: :no_content
   rescue ActiveRecord::RecordNotFound
     render json: {}, status: :not_found

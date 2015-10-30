@@ -9,10 +9,11 @@ describe List do
   it { should belong_to(:user) }
   it { should validate_presence_of(:name) }
   it { should validate_inclusion_of(:permissions).in_array(%w( viewable private open )) }
+  it { should define_enum_for(:status) }
   it 'Invalidate permissions' do
     expect(List.new(permissions: 'other string')).not_to be_valid
   end
-  it 'Invalidation messages' do
+  it 'Invalid permissions messages' do
     invalid_list = List.new(permissions: 'other string')
     invalid_list.valid?
     expect(invalid_list.errors.full_messages[0]).to eq('Name can\'t be blank')
@@ -30,6 +31,21 @@ describe List do
       while counter < lists.length
         expect(lists[counter].user_id).to eq(user.id)
         counter += 1
+      end
+    end
+  end
+  describe '.items_archived' do
+    before do
+      @items_dependent = create_list(:item, 5, list: @list)
+    end
+    it 'archives dependent items when list becomes archived' do
+      items = Item.where(status: 0).all
+      expect(items.length).to eq(5)
+      @list.archived!
+      items = Item.where(status: 0).all
+      expect(items.length).to eq(0)
+      items.each do |item|
+        expect(item.status).to eq('archived')
       end
     end
   end

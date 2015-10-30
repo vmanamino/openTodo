@@ -1,4 +1,6 @@
 class Item < ActiveRecord::Base
+  include Enums
+
   belongs_to :list
 
   validates :name, presence: true
@@ -8,7 +10,7 @@ class Item < ActiveRecord::Base
 
   def self.owned(user) # rubocop:disable Metrics/MethodLength
     items_owned = []
-    owned_lists = List.where(user_id: user.id).all
+    owned_lists = List.where('user_id=? AND status=?', user.id, 0).all
     counter = 0
     while counter < owned_lists.length
       items = Item.where(list_id: owned_lists[counter].id)

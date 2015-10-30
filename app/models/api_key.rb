@@ -1,4 +1,6 @@
 class ApiKey < ActiveRecord::Base
+  include Enums
+
   belongs_to :user
 
   validate :expires_at_is_time
