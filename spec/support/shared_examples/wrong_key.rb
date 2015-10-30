@@ -3,7 +3,6 @@ require 'support/path_helper'
 include PathHelper
 
 shared_examples 'wrong key' do |object, verb_pair, parameters|
-  let(:user) { create(:user) }
   let(:api_key) { create(:api_key) }
   it 'responds with unauthorized', type: :request do
     key = user_key(api_key.access_token)
@@ -17,7 +16,6 @@ shared_examples 'wrong key' do |object, verb_pair, parameters|
 end
 
 shared_examples 'wrong key with message' do |object, verb_pair, parameters, message|
-  let(:user) { create(:user) }
   let(:api_key) { create(:api_key) }
   it 'responds with unauthorized', type: :request do
     key = user_key(api_key.access_token)
@@ -31,7 +29,6 @@ shared_examples 'wrong key with message' do |object, verb_pair, parameters, mess
 end
 
 shared_examples 'create with the wrong key' do |object, parameters|
-  let(:user) { create(:user) }
   let(:api_key) { create(:api_key) }
   it 'responds with unauthorized', type: :controller do
     case object
@@ -45,7 +42,6 @@ shared_examples 'create with the wrong key' do |object, parameters|
 end
 
 shared_examples 'create with the wrong key message' do |object, parameters, message|
-  let(:user) { create(:user) }
   let(:api_key) { create(:api_key) }
   it 'responds with unauthorized', type: :controller do
     case object
@@ -59,7 +55,6 @@ shared_examples 'create with the wrong key message' do |object, parameters, mess
 end
 
 shared_examples 'update with the wrong key' do |object, parameters|
-  let(:user) { create(:user) }
   let(:api_key) { create(:api_key) }
   it 'responds with unauthorized', type: :controller do
     case object
@@ -73,7 +68,6 @@ shared_examples 'update with the wrong key' do |object, parameters|
 end
 
 shared_examples 'update with the wrong key message' do |object, parameters, message|
-  let(:user) { create(:user) }
   let(:api_key) { create(:api_key) }
   it 'responds with unauthorized', type: :controller do
     case object
@@ -88,7 +82,6 @@ shared_examples 'update with the wrong key message' do |object, parameters, mess
 end
 
 shared_examples 'destroy with the wrong key' do |object|
-  let(:user) { create(:user) }
   let(:api_key) { create(:api_key) }
   it 'responds with unauthorized', type: :controller do
     case object
@@ -103,7 +96,6 @@ shared_examples 'destroy with the wrong key' do |object|
 end
 
 shared_examples 'destroy with the wrong key message' do |object, message|
-  let(:user) { create(:user) }
   let(:api_key) { create(:api_key) }
   it 'responds with unauthorized', type: :controller do
     case object

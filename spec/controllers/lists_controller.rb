@@ -68,25 +68,30 @@ RSpec.describe Api::ListsController, type: :controller do
         post :create, user_id: user.id, list: { name: 'my new list' }
         expect(response_in_json['list']['name']).to eq('my new list')
       end
-      it 'new list has default permissions \'viewable\'' do
-        post :create, user_id: user.id, list: { name: 'my list' }
-        expect(response_in_json['list']['permissions']).to eq('viewable')
+      context 'list object status' do
+        it_behaves_like 'create object status active', 'list', { name: 'my new list' } # rubocop:disable all
       end
-      it 'includes id' do
-        post :create, user_id: user.id, list: { name: 'my list' }
-        check_object(response_in_json, 'list', 'id', true)
-      end
-      it 'includes name' do
-        post :create, user_id: user.id, list: { name: 'my list' }
-        check_object(response_in_json, 'list', 'name', true)
-      end
-      it 'includes permissions' do
-        post :create, user_id: user.id, list: { name: 'my list' }
-        check_object(response_in_json, 'list', 'permissions', true)
-      end
-      it 'includes user id' do
-        post :create, user_id: user.id, list: { name: 'my list' }
-        check_object(response_in_json, 'list', 'user_id', true)
+      context 'presence of attributes' do
+        it 'new list has default permissions \'viewable\'' do
+          post :create, user_id: user.id, list: { name: 'my list' }
+          expect(response_in_json['list']['permissions']).to eq('viewable')
+        end
+        it 'includes id' do
+          post :create, user_id: user.id, list: { name: 'my list' }
+          check_object(response_in_json, 'list', 'id', true)
+        end
+        it 'includes name' do
+          post :create, user_id: user.id, list: { name: 'my list' }
+          check_object(response_in_json, 'list', 'name', true)
+        end
+        it 'includes permissions' do
+          post :create, user_id: user.id, list: { name: 'my list' }
+          check_object(response_in_json, 'list', 'permissions', true)
+        end
+        it 'includes user id' do
+          post :create, user_id: user.id, list: { name: 'my list' }
+          check_object(response_in_json, 'list', 'user_id', true)
+        end
       end
       it 'user_id belongs to user' do
         post :create, user_id: user.id, list: { name: 'my list' }
@@ -100,10 +105,6 @@ RSpec.describe Api::ListsController, type: :controller do
         post :create, user_id: user.id, list: { name: 'my list', permissions: 'private' }
         expect(response_in_json['list']['permissions']).to eq('private')
       end
-      it 'failure responds with appropriate error message for absent name' do
-        post :create, user_id: user.id, list: { name: ' ' }
-        expect(response_in_json['errors'][0]).to eq('Name can\'t be blank')
-      end
       it 'list user is key user' do
         post :create, user_id: user.id, list: { name: 'my list' }
         expect(response_in_json['list']['user_id']).to eq(api_key.user.id)
@@ -111,11 +112,6 @@ RSpec.describe Api::ListsController, type: :controller do
       it 'params user is list user' do
         post :create, user_id: user.id, list: { name: 'my list' }
         expect(response_in_json['list']['user_id']).to eq(user.id)
-      end
-      it 'responds with unauthorized when key user not user in params' do
-        user_other = create(:user)
-        post :create, user_id: user_other.id, list: { name: 'my list' }
-        expect(response).to have_http_status(:unauthorized)
       end
       context 'invalid attributes' do
         context 'empty' do
@@ -147,7 +143,7 @@ RSpec.describe Api::ListsController, type: :controller do
       end
       it_behaves_like 'create with expired key', 'list', { name: 'my shared example list', permissions: 'viewable' } # rubocop:disable all
     end
-    context 'user with wrong key' do
+    context 'user unauthorized' do
       before do
         http_key_auth
       end
@@ -218,18 +214,15 @@ RSpec.describe Api::ListsController, type: :controller do
         http_key_auth
       end
       it_behaves_like 'destroy with active valid key', 'list'
+      context 'list object status' do
+        it_behaves_like 'destroy action archives object', 'list'
+      end
       context 'non-existent list object' do
         it_behaves_like 'no object found controller', 'list'
       end
-#       context 'item dependents' do
-#         it 'destroys item dependents' do
-#           items = Item.all
-#           expect(items.length).to eq(5)
-#           delete :destroy, user_id: user.id, id: @list_destroy.id
-#           items.reload
-#           expect(items.length).to eq(0)
-#         end
-#       end
+      context 'item dependents' do
+        it_behaves_like 'destroy action archives object dependents', 'list', 'item', 5
+      end
     end
     context 'user without key' do
       it 'responds with unauthorized to unauthenticated user' do

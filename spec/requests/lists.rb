@@ -69,7 +69,7 @@ RSpec.describe Api::ListsController, type: :request do
         expect(response_in_json['list']['name']).to eq('my new list')
       end
       context 'list object status' do
-        it_behaves_like 'creates object with active status', 'list', { name: 'my new list' }
+        it_behaves_like 'creates object with active status', 'list', { name: 'my new list' } # rubocop:disable all
       end
       context 'presence of attributes' do
         it 'serialized list includes id' do

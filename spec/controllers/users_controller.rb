@@ -6,46 +6,15 @@ include ExpiredKey
 RSpec.describe Api::UsersController, type: :controller do
   let(:user) { create(:user) }
   let(:api_key) { create(:api_key, user: user) }
-#   describe '#index' do
-#     before do
-#       @users = create_list(:user, 5)
-#     end
-#     context 'active valid key' do
-#       before do
-#         http_key_auth
-#       end
-#       it_behaves_like 'index with active valid key'
-#       it 'returns users serialized in json' do
-#         get :index
-#         expect(response_in_json['users'].length).to eq(6)
-#       end
-#       it 'serialized json excludes private attributes' do
-#         get :index
-#         check_each_object(response_in_json, 'password', false)
-#       end
-#       it 'serialized json includes specified attributes in UserSerializer' do
-#         get :index
-#         check_each_object(response_in_json, 'id', true)
-#         check_each_object(response_in_json, 'username', true)
-#       end
-#     end
-#     it 'unauthenticated user responds with http unauthorized' do
-#       get :index
-#       expect(response).to have_http_status(:unauthorized)
-#     end
-#     context 'user without key' do
-#       it_behaves_like 'index unauthorized'
-#     end
-#     context 'user with expired key' do
-#       it_behaves_like 'index with expired key'
-#     end
-#   end
   describe '#create' do
     context 'active valid key' do
       before do
         http_key_auth
       end
       it_behaves_like 'create with active valid key', 'user', { username: 'newone', password: 'noone' } # rubocop:disable all
+      context 'user object status' do
+        it_behaves_like 'create object status active', 'user', { username: 'newone', password: 'noone' } # rubocop:disable all
+      end
       it 'renders newly created user in JSON format' do
         post :create, user: { username: 'newone', password: 'noone' }
         expect(response_in_json['user']['username']).to eq('newone')
@@ -105,16 +74,33 @@ RSpec.describe Api::UsersController, type: :controller do
       end
       it_behaves_like 'destroy with active valid key', 'user'
       context 'user object status' do
-        
+        it_behaves_like 'destroy action archives object', 'user'
       end
       context 'destroy dependents' do
-        
+        before do
+          @keys = create_list(:api_key, 5, user_id: @user_destroy.id)
+        end
+        it_behaves_like 'destroy action archives object dependents', 'user', 'list', 5
+        # plus one for helper key above equals six keys
+        it_behaves_like 'destroy action archives object dependents', 'user', 'api_key', 6
       end
-      context 'destroy object archives dependents' do
-        
-      end
-      context 'destroy grandchildrend' do
-        
+      context 'destroy grandchildren' do
+        before do
+          @lists.each do |list|
+            create_list(:item, 5, list: list) # 5 lists times 5 items each equals 25 grandchildren
+          end
+        end
+        it 'archives all items of lists belonging to user' do
+          items = Item.where(status: 0).all
+          expect(items.length).to eq(25)
+          delete :destroy, id: @user_destroy.id
+          items.reload
+          items.each do |item|
+            expect(item.status).to eq('archived')
+          end
+          items = Item.where(status: 0).all
+          expect(items.length).to eq(0)
+        end
       end
     end
     context 'user without key' do

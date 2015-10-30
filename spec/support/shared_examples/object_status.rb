@@ -20,7 +20,7 @@ shared_examples 'creates object with active status' do |model, parameters|
     when 'user'
       post '/api/users', { user: parameters }, 'HTTP_AUTHORIZATION' => key
     when 'list'
-      post "/api/users/#{user.id}/lists", { list: parameters } , 'HTTP_AUTHORIZATION' => key
+      post "/api/users/#{user.id}/lists", { list: parameters }, 'HTTP_AUTHORIZATION' => key
     end
     object = Object.const_get(model.capitalize)
     this_object = object.first
@@ -38,13 +38,18 @@ shared_examples 'destroy archives object' do |model|
     end
     object = Object.const_get(model.capitalize)
     this_object = object.first
-    expect(this_object.status).to eq("archived")
+    expect(this_object.status).to eq('archived')
   end
 end
 
 shared_examples 'destroy archives object dependents' do |model, dependent, number|
   it 'dependents become archived', type: :request do
-    object = Object.const_get(dependent.capitalize)
+    object = ''
+    if dependent == 'api_key'
+      object = ApiKey
+    else
+      object = Object.const_get(dependent.capitalize)
+    end
     dependents = object.where(status: 0).all
     expect(dependents.length).to eq(number)
     case model
@@ -63,9 +68,48 @@ shared_examples 'create object status active' do |model, parameters|
     case model
     when 'user'
       post :create, user: parameters
+    when 'list'
+      post :create, user_id: user.id, list: parameters
+    when 'item'
+      post :create, list_id: list.id, item: parameters
     end
     object = Object.const_get(model.capitalize)
     this_object = object.first
     expect(this_object.status).to eq('active')
+  end
+end
+
+shared_examples 'destroy action archives object' do |model|
+  it 'makes object active', type: :controller do
+    case model
+    when 'user'
+      delete :destroy, id: @user_destroy.id
+    when 'list'
+      delete :destroy, user_id: user.id, id: @list_destroy.id
+    end
+    object = Object.const_get(model.capitalize)
+    this_object = object.first
+    expect(this_object.status).to eq('archived')
+  end
+end
+
+shared_examples 'destroy action archives object dependents' do |model, dependent, number|
+  it 'dependents become archived', type: :controller do
+    object = ''
+    if dependent == 'api_key'
+      object = ApiKey
+    else
+      object = Object.const_get(dependent.capitalize)
+    end
+    dependents = object.where(status: 0).all
+    expect(dependents.length).to eq(number)
+    case model
+    when 'user'
+      delete :destroy, id: @user_destroy.id
+    when 'list'
+      delete :destroy, user_id: user.id, id: @list_destroy.id
+    end
+    dependents = object.where(status: 0).all
+    expect(dependents.length).to eq(0)
   end
 end

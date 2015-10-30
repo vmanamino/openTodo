@@ -8,7 +8,6 @@ class List < ActiveRecord::Base
 
   validates :name, presence: true
   validates :permissions, inclusion: %w( viewable private open ), allow_nil: false
-  # validates :status, inclusion: { in: statuses.keys }
 
   after_update :items_archived
   after_initialize :defaults, if: :new_record?
@@ -16,11 +15,10 @@ class List < ActiveRecord::Base
   private
 
   def items_archived
-    if self.status == 'archived'
-      items = Item.where('list_id=? AND status=?', self, 0).all
-      items.each do |item|
-        item.archived!
-      end
+    return false unless self.status == 'archived' # rubocop:disable Style/RedundantSelf
+    items = Item.where('list_id=? AND status=?', self, 0).all
+    items.each do |item| # rubocop:disable Style/SymbolProc
+      item.archived!
     end
   end
 
