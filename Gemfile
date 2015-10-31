@@ -73,3 +73,7 @@ gem 'factory_girl_rails', '~> 4.0'
 
 # test code coverage
 gem 'simplecov', require: false, group: :test
+
+# interface for admin users
+gem 'activeadmin', github: 'activeadmin'
+

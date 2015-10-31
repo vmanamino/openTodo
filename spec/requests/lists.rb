@@ -174,6 +174,18 @@ RSpec.describe Api::ListsController, type: :request do
           end
         end
       end
+      context 'dependents' do
+        before do
+          @item_dependents = create_list(:item, 5, list_id: @list_update.id)
+        end
+        it 'item status remains active' do
+          patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+          items = Item.where(list_id: @list_update.id).all
+          items.each do |item| # rubocop:disable Style/SymbolProc
+            expect(item.status).to eq('active')
+          end
+        end
+      end
     end
     context 'user without key' do
       it_behaves_like 'unauthenticated user', 'list', { :update => :patch }, { list: { name: 'my new list', permissions: 'private' } } # rubocop:disable all
