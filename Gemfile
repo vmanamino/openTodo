@@ -74,6 +74,8 @@ gem 'factory_girl_rails', '~> 4.0'
 # test code coverage
 gem 'simplecov', require: false, group: :test
 
+# Devise for activeadmin
+gem 'devise'
+
 # interface for admin users
 gem 'activeadmin', github: 'activeadmin'
-
