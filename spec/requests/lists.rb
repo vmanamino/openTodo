@@ -177,12 +177,22 @@ RSpec.describe Api::ListsController, type: :request do
       context 'dependents' do
         before do
           @item_dependents = create_list(:item, 5, list_id: @list_update.id)
+          @item_dependents_archived = create_list(:item, 5, list_id: @list_update, status: 1)
         end
         it 'item status remains active' do
           patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
-          items = Item.where(list_id: @list_update.id).all
+          items = Item.active.all
+          expect(items.length).to eq(5)
           items.each do |item|
             expect(item.status).to eq('active')
+          end
+        end
+        it 'item status remains archived' do
+          patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
+          items = Item.archived.all
+          expect(items.length).to eq(5)
+          items.each do |item|
+            expect(item.status).to eq('archived')
           end
         end
       end
