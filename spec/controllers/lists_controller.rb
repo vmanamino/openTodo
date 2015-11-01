@@ -203,7 +203,7 @@ RSpec.describe Api::ListsController, type: :controller do
         it 'item dependents remain active' do
           patch :update, user_id: user.id, id: @list_update.id, list: { name: 'new and improved', permissions: 'private' } # rubocop:disable all
           items = Item.where(list_id: @list_update.id).all
-          items.each do |item| # rubocop:disable Style/SymbolProc
+          items.each do |item|
             expect(item.status).to eq('active')
           end
         end

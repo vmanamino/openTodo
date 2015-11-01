@@ -181,7 +181,7 @@ RSpec.describe Api::ListsController, type: :request do
         it 'item status remains active' do
           patch "/api/users/#{user.id}/lists/#{@list_update.id}", { list: { name: 'my new list', permissions: 'private' } }, 'HTTP_AUTHORIZATION' => key # rubocop:disable Metrics/LineLength
           items = Item.where(list_id: @list_update.id).all
-          items.each do |item| # rubocop:disable Style/SymbolProc
+          items.each do |item|
             expect(item.status).to eq('active')
           end
         end
