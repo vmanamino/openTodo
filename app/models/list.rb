@@ -1,7 +1,7 @@
 class List < ActiveRecord::Base
   include Enums
 
-  scope :visible_to, -> (user) { where('user_id=? AND status=?', user.id, 0) }
+  scope :visible_to, -> (user) { active.where(user_id: user.id) }
 
   belongs_to :user
   has_many :items, dependent: :destroy
@@ -16,7 +16,7 @@ class List < ActiveRecord::Base
 
   def items_archived
     return false unless self.status == 'archived' # rubocop:disable Style/RedundantSelf
-    items = Item.where('list_id=? AND status=?', self, 0).all
+    items = Item.active.where(list_id: self).all
     items.each do |item| # rubocop:disable Style/SymbolProc
       item.archived!
     end
